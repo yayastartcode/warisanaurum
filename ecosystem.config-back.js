@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'warisan-backend',
       script: './backend/dist/index.js',
-      cwd: '/var/www/warisan',
+      cwd: '/home/elphyta/warisan',
       instances: 1,
       exec_mode: 'cluster',
       env: {
@@ -31,9 +31,9 @@ module.exports = {
   deploy: {
     production: {
       user: 'root',
-      host: 'your-server-ip',
+      host: '159.223.74.131',
       ref: 'origin/main',
-      repo: 'https://github.com/your-username/warisan.git',
+      repo: 'https://github.com/yayastartcode/warisanaurum.git',
       path: '/var/www/warisan',
       'post-deploy': 'cd backend && npm install --production && npm run build && pm2 reload ecosystem.config.js --env production && pm2 save'
     }

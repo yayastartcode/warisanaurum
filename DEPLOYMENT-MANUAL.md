@@ -95,7 +95,7 @@ PORT=3000
 MONGODB_URI=mongodb://localhost:27017/warisan
 JWT_SECRET=your-super-secret-jwt-key-here
 JWT_EXPIRES_IN=7d
-CORS_ORIGIN=https://your-domain.com
+CORS_ORIGIN=https://warisanaurum.online
 ```
 
 ```bash
@@ -193,7 +193,7 @@ sudo ufw enable
 sudo apt install certbot python3-certbot-nginx
 
 # Dapatkan SSL certificate
-sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+sudo certbot --nginx -d warisanaurum.online -d www.warisanaurum.online
 
 # Setup auto-renewal
 sudo crontab -e
