@@ -79,7 +79,7 @@ const Main: React.FC = () => {
   return (
     <div 
       className="min-h-screen bg-cover bg-center bg-no-repeat relative"
-      style={{ backgroundImage: 'url(/wyg.webp)' }}
+      style={{ backgroundImage: 'url(/wyg.jpg)' }}
     >
       {/* Overlay untuk readability */}
       <div className="absolute inset-0 bg-black bg-opacity-40"></div>
@@ -93,7 +93,7 @@ const Main: React.FC = () => {
                 <Link to="/" className="mr-4">
                   <ArrowLeft className="h-6 w-6 text-gray-600 hover:text-gray-800" />
                 </Link>
-                <img src="/wyg.webp" alt="WARISAN" className="h-10 w-10 mr-3" />
+                <img src="/wyg.jpg" alt="WARISAN" className="h-10 w-10 mr-3" />
                 <h1 className="text-2xl font-bold text-gray-900">WARISAN - Main Game</h1>
               </div>
               <div className="flex items-center space-x-4">
@@ -182,14 +182,13 @@ const Main: React.FC = () => {
           {selectedCharacter && (
             <div className="bg-white bg-opacity-95 rounded-xl shadow-xl p-8 text-center mb-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Karakter Terpilih: {selectedCharacter.name}
+                Mari kita Mengenal {selectedCharacter.name} lebih dekat dengan scan QR dibawah ini menggunakan aplikasi AR Scanner pilihan anda
               </h3>
               <img 
-                src={selectedCharacter.image} 
-                alt={selectedCharacter.name}
-                className="w-24 h-24 mx-auto mb-4 object-contain"
+                src={`/${selectedCharacter.name.toLowerCase()}qr.png`}
+                alt={`QR Code ${selectedCharacter.name}`}
+                className="w-48 h-48 mx-auto mb-6 object-contain"
               />
-              <p className="text-gray-600 mb-6">{selectedCharacter.description}</p>
               <button
                 onClick={startGame}
                 className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg"

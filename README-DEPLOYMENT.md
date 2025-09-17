@@ -128,7 +128,36 @@ sudo systemctl reload nginx
 
 # Database backup
 mongodump --db warisan --out /var/backups/mongodb/$(date +%Y%m%d)
+
+
 ```
+sudo chown -R www-data:www-data /home/warisan/warisanaurum/backend/dist
+sudo chown -R www-data:www-data /home/warisan/warisanaurum/frontend/dist
+
+sudo chmod -R 755 /home/warisan/warisanaurum/backend/dist
+sudo chmod -R 755 /home/warisan/warisanaurum/frontend/dist
+
+# Fix permissions for all files (including assets)
+sudo find /home/warisan/warisanaurum/backend/dist -type f -exec chmod 644 {} \;
+sudo find /home/warisan/warisanaurum/frontend/dist -type f -exec chmod 644 {} \;
+
+sudo find /home/warisan/warisanaurum/backend/dist -type d -exec chmod 755 {} \;
+sudo find /home/warisan/warisanaurum/frontend/dist -type d -exec chmod 755 {} \;
+
+sudo chown -R www-data:www-data /home/warisan/warisanaurum/backend/dist/assets
+sudo chown -R www-data:www-data /home/warisan/warisanaurum/frontend/dist/assets
+sudo chmod -R 755 /home/warisan/warisanaurum/backend/dist/assets
+sudo chmod -R 755 /home/warisan/warisanaurum/frontend/dist/assets
+sudo chmod -R 644 /home/warisan/warisanaurum/backend/dist/assets/*
+sudo chmod -R 644 /home/warisan/warisanaurum/frontend/dist/assets/*
+
+# Add warisan user to www-data group
+sudo usermod -a -G www-data warisan
+
+# Set proper permissions for parent directories
+sudo chmod 755 /home/warisan
+sudo chmod 755 /home/warisan/warisanaurum
+
 
 ## 🔒 Security Setup
 

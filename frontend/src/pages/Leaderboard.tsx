@@ -1,24 +1,80 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Trophy, Medal, Award, Crown } from 'lucide-react';
+import { ArrowLeft, Trophy, Medal, Award, Crown, Clock, Star } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+
+interface GameResult {
+  characterId: string;
+  score: number;
+  timeElapsed: number;
+  livesRemaining: number;
+  totalQuestions: number;
+  correctAnswers: number;
+  completedAt: string;
+}
+
+interface LeaderboardEntry {
+  rank: number;
+  username: string;
+  score: number;
+  character: string;
+  timeElapsed: number;
+  accuracy: number;
+  completedAt: string;
+}
 
 const Leaderboard: React.FC = () => {
   const { user } = useAuth();
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock data untuk leaderboard
-  const leaderboardData = [
-    { rank: 1, username: 'BudiJawa', score: 2850, gamesPlayed: 15 },
-    { rank: 2, username: 'SariKultur', score: 2720, gamesPlayed: 12 },
-    { rank: 3, username: 'RamaTraditional', score: 2650, gamesPlayed: 18 },
-    { rank: 4, username: 'DewiJavanese', score: 2480, gamesPlayed: 10 },
-    { rank: 5, username: 'ArjunaBudaya', score: 2350, gamesPlayed: 14 },
-    { rank: 6, username: 'SitiWarisan', score: 2200, gamesPlayed: 9 },
-    { rank: 7, username: 'AgusNusantara', score: 2150, gamesPlayed: 11 },
-    { rank: 8, username: 'IndraCulture', score: 2050, gamesPlayed: 8 },
-    { rank: 9, username: 'MayaJawa', score: 1980, gamesPlayed: 13 },
-    { rank: 10, username: 'FajarTradisi', score: 1850, gamesPlayed: 7 },
-  ];
+  useEffect(() => {
+    loadLeaderboardData();
+  }, []);
+
+  const loadLeaderboardData = () => {
+    try {
+      const gameResults = JSON.parse(localStorage.getItem('gameResults') || '[]') as GameResult[];
+      
+      // Convert game results to leaderboard entries
+      const entries: LeaderboardEntry[] = gameResults.map((result, index) => {
+        const characterNames: { [key: string]: string } = {
+          '1': 'Semar',
+          '2': 'Gareng', 
+          '3': 'Petruk',
+          '4': 'Bagong'
+        };
+        
+        return {
+          rank: 0, // Will be set after sorting
+          username: user?.username || `Player${index + 1}`,
+          score: result.score,
+          character: characterNames[result.characterId] || 'Unknown',
+          timeElapsed: result.timeElapsed,
+          accuracy: Math.round((result.correctAnswers / result.totalQuestions) * 100),
+          completedAt: result.completedAt
+        };
+      });
+      
+      // Sort by score (highest first) and assign ranks
+      const sortedEntries = entries
+        .sort((a, b) => b.score - a.score)
+        .map((entry, index) => ({ ...entry, rank: index + 1 }));
+      
+      setLeaderboardData(sortedEntries);
+    } catch (error) {
+      console.error('Error loading leaderboard data:', error);
+      setLeaderboardData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -49,7 +105,7 @@ const Leaderboard: React.FC = () => {
   return (
     <div 
       className="min-h-screen bg-cover bg-center bg-no-repeat relative"
-      style={{ backgroundImage: 'url(/wyg.webp)' }}
+      style={{ backgroundImage: 'url(/wyg.jpg)' }}
     >
       {/* Overlay untuk readability */}
       <div className="absolute inset-0 bg-black bg-opacity-30"></div>
@@ -104,7 +160,16 @@ const Leaderboard: React.FC = () => {
 
         {/* Leaderboard */}
         <div className="space-y-3">
-          {leaderboardData.map((player) => (
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="text-gray-600">Memuat data leaderboard...</div>
+            </div>
+          ) : leaderboardData.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="text-gray-600">Belum ada data permainan. Mulai bermain untuk muncul di leaderboard!</div>
+            </div>
+          ) : (
+            leaderboardData.map((player) => (
             <div
               key={player.rank}
               className={`${getRankBg(player.rank)} border rounded-xl p-6 transition-all duration-200 hover:shadow-lg`}
@@ -118,9 +183,17 @@ const Leaderboard: React.FC = () => {
                     <h3 className="text-lg font-semibold text-gray-900">
                       {player.username}
                     </h3>
-                    <p className="text-sm text-gray-600">
-                      {player.gamesPlayed} permainan dimainkan
-                    </p>
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <span className="flex items-center gap-1">
+                        <Star className="h-4 w-4" />
+                        {player.character}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        {formatTime(player.timeElapsed)}
+                      </span>
+                      <span>{player.accuracy}% akurasi</span>
+                    </div>
                   </div>
                 </div>
                 <div className="text-right">
@@ -131,7 +204,8 @@ const Leaderboard: React.FC = () => {
                 </div>
               </div>
             </div>
-          ))}
+          ))
+          )}
         </div>
 
         {/* Stats Section */}

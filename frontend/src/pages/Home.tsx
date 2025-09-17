@@ -9,7 +9,7 @@ const Home: React.FC = () => {
   return (
     <div 
       className="min-h-screen bg-cover bg-center bg-no-repeat relative"
-      style={{ backgroundImage: 'url(/wyg.webp)' }}
+      style={{ backgroundImage: 'url(/wyg.jpg)' }}
     >
       {/* Overlay untuk readability */}
       <div className="absolute inset-0 bg-black bg-opacity-30"></div>
@@ -20,7 +20,7 @@ const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <img src="/wyg.webp" alt="WARISAN" className="h-10 w-10 mr-3" />
+              <img src="/wyg.jpg" alt="WARISAN" className="h-10 w-10 mr-3" />
               <h1 className="text-2xl font-bold text-gray-900">WARISAN</h1>
             </div>
             <div className="flex items-center space-x-4">

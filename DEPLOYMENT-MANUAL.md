@@ -137,6 +137,7 @@ nano ecosystem.config.js
 
 # Start aplikasi dengan PM2
 pm2 start ecosystem.config.js
+pm2 stop ecosystem.config.js
 
 # Save PM2 configuration
 pm2 save
