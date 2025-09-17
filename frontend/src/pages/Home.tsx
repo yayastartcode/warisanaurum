@@ -44,7 +44,7 @@ const Home: React.FC = () => {
             Selamat Datang di WARISAN
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Jelajahi kekayaan budaya Jawa melalui permainan interaktif yang menyenangkan
+            Jelajahi  Bahasa Jawa melalui permainan interaktif yang menyenangkan
           </p>
         </div>
 
@@ -112,8 +112,8 @@ const Home: React.FC = () => {
 
         {/* Footer Info */}
         <div className="text-center mt-12 pt-8 border-t border-gray-200">
-          <p className="text-gray-500">
-            WARISAN - Melestarikan Budaya Jawa untuk Generasi Mendatang
+          <p className="text-white">
+            WARISAN - Melestarikan Bahasa Jawa untuk Generasi Mendatang
           </p>
         </div>
       </div>
