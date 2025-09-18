@@ -3,8 +3,10 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IQuestion extends Document {
   characterId: mongoose.Types.ObjectId;
   question: string;
+  questionType: 'multiple_choice' | 'essay';
   options: string[];
   correctAnswer: number;
+  correctAnswerText: string;
   explanation: string;
   difficulty: 'easy' | 'medium' | 'hard';
   points: number;
@@ -26,17 +28,32 @@ const QuestionSchema: Schema = new Schema({
     trim: true,
     maxlength: [500, 'Pertanyaan tidak boleh lebih dari 500 karakter']
   },
+  questionType: {
+    type: String,
+    required: [true, 'Tipe pertanyaan diperlukan'],
+    enum: {
+      values: ['multiple_choice', 'essay'],
+      message: 'Tipe pertanyaan harus salah satu dari: multiple_choice, essay'
+    },
+    default: 'multiple_choice'
+  },
   options: [{
     type: String,
-    required: true,
+    required: false,
     trim: true,
     maxlength: [200, 'Setiap opsi tidak boleh lebih dari 200 karakter']
   }],
   correctAnswer: {
     type: Number,
-    required: [true, 'Indeks jawaban benar diperlukan'],
+    required: false,
     min: [0, 'Indeks jawaban benar minimal 0'],
     max: [3, 'Indeks jawaban benar tidak boleh lebih dari 3']
+  },
+  correctAnswerText: {
+    type: String,
+    required: false,
+    trim: true,
+    maxlength: [1000, 'Jawaban benar tidak boleh lebih dari 1000 karakter']
   },
   explanation: {
     type: String,
@@ -75,15 +92,32 @@ const QuestionSchema: Schema = new Schema({
   timestamps: true
 });
 
-// Validation for options array
+// Validation for different question types
 QuestionSchema.pre('save', function(next) {
-  if ((this as any)['options'].length !== 4) {
-    return next(new Error('Question must have exactly 4 options'));
-  }
+  const questionType = (this as any)['questionType'];
   
-  const correctIndex = (this as any)['correctAnswer'];
-  if (correctIndex < 0 || correctIndex >= (this as any)['options'].length) {
-    return next(new Error('Correct answer index is out of range'));
+  if (questionType === 'multiple_choice') {
+    // Validate multiple choice questions
+    if (!(this as any)['options'] || (this as any)['options'].length !== 4) {
+      return next(new Error('Multiple choice questions must have exactly 4 options'));
+    }
+    
+    const correctIndex = (this as any)['correctAnswer'];
+    if (correctIndex === undefined || correctIndex < 0 || correctIndex >= (this as any)['options'].length) {
+      return next(new Error('Multiple choice questions must have a valid correct answer index'));
+    }
+    
+    // Clear correctAnswerText for multiple choice
+    (this as any)['correctAnswerText'] = undefined;
+  } else if (questionType === 'essay') {
+    // Validate essay questions
+    if (!(this as any)['correctAnswerText'] || (this as any)['correctAnswerText'].trim() === '') {
+      return next(new Error('Essay questions must have a correct answer text'));
+    }
+    
+    // Clear options and correctAnswer for essay
+    (this as any)['options'] = [];
+    (this as any)['correctAnswer'] = undefined;
   }
   
   next();

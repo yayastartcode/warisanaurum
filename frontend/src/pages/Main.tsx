@@ -60,8 +60,19 @@ const Main: React.FC = () => {
     
     setTimeout(() => {
       const normalizedRotation = finalRotation % 360;
-      const segmentAngle = 360 / characters.length;
-      const selectedIndex = Math.floor((360 - normalizedRotation + segmentAngle / 2) / segmentAngle) % characters.length;
+      const segmentAngle = 360 / characters.length; // 90 degrees per segment
+      
+      // Hitung index berdasarkan posisi pointer (di atas)
+      // Pointer menunjuk ke atas (0 derajat), jadi kita perlu menyesuaikan
+      const adjustedRotation = (normalizedRotation + segmentAngle / 2) % 360;
+      const selectedIndex = Math.floor(adjustedRotation / segmentAngle) % characters.length;
+      
+      console.log('Spin result - finalRotation:', finalRotation);
+      console.log('Spin result - normalizedRotation:', normalizedRotation);
+      console.log('Spin result - adjustedRotation:', adjustedRotation);
+      console.log('Spin result - segmentAngle:', segmentAngle);
+      console.log('Spin result - selectedIndex:', selectedIndex);
+      console.log('Spin result - selected character:', characters[selectedIndex]);
       
       setSelectedCharacter(characters[selectedIndex]);
       setIsSpinning(false);
@@ -70,9 +81,11 @@ const Main: React.FC = () => {
 
   const startGame = () => {
     if (selectedCharacter) {
+      console.log('Starting game with character:', selectedCharacter);
       // Simpan karakter yang dipilih ke localStorage atau state management
       localStorage.setItem('selectedCharacter', JSON.stringify(selectedCharacter));
-      navigate('/gameplay');
+      console.log('Character saved to localStorage:', JSON.stringify(selectedCharacter));
+      navigate('/level-selection');
     }
   };
 

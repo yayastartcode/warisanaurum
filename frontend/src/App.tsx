@@ -9,8 +9,10 @@ import Dashboard from './pages/Dashboard';
 import Tutorial from './pages/Tutorial';
 import Leaderboard from './pages/Leaderboard';
 import Main from './pages/Main';
+import LevelSelection from './pages/LevelSelection';
 import Game from './pages/Game';
 import GamePlay from './pages/GamePlay';
+import QuestionManager from './pages/QuestionManager';
 import Test from './pages/Test';
 
 function App() {
@@ -92,10 +94,26 @@ function App() {
             }
           />
           <Route
+            path="/level-selection"
+            element={
+              <ProtectedRoute>
+                <LevelSelection />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/gameplay"
             element={
               <ProtectedRoute>
                 <GamePlay />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/question-manager"
+            element={
+              <ProtectedRoute>
+                <QuestionManager />
               </ProtectedRoute>
             }
           />

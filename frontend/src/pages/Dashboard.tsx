@@ -3,20 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { apiService } from '../services/api';
 import { Play, Trophy, Star, TrendingUp } from 'lucide-react';
-import WheelOfFortune from '../components/WheelOfFortune';
-import type { Character, GameSession } from '../types';
+import type { GameSession } from '../types';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [recentSessions, setRecentSessions] = useState<GameSession[]>([]);
-  const [characters, setCharacters] = useState<Character[]>([]);
-  const [isSpinning, setIsSpinning] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchRecentSessions();
-    fetchCharacters();
   }, []);
 
   const fetchRecentSessions = async (): Promise<void> => {
@@ -28,50 +24,14 @@ const Dashboard: React.FC = () => {
     } catch (error) {
       console.error('Failed to fetch recent sessions:', error);
       setRecentSessions([]); // Ensure recentSessions is always an array
-    }
-  };
-
-  const fetchCharacters = async () => {
-    try {
-      const response = await apiService.getCharacters({ limit: 10 });
-      // Handle the backend response structure: response.data.data.characters
-      const charactersData = response.data.data?.characters || [];
-      setCharacters(Array.isArray(charactersData) ? charactersData : []);
-    } catch (error) {
-      console.error('Failed to fetch characters:', error);
-      setCharacters([]); // Ensure characters is always an array
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSpinWheel = async (): Promise<void> => {
-    setIsSpinning(true);
-    try {
-      const response = await apiService.spinWheel();
-      const spinData = response.data.data;
-      
-      if (!spinData) {
-        throw new Error('No character selected');
-      }
-      
-      // Start a new game session with the selected character
-      const sessionResponse = await apiService.startGameSession(spinData.character._id);
-      const sessionData = sessionResponse.data.data;
-      
-      if (!sessionData) {
-        throw new Error('Failed to create game session');
-      }
-      
-      // Navigate to the game with the session
-      navigate(`/game/${sessionData.session._id}`);
-    } catch (error: unknown) {
-        console.error('Failed to spin wheel:', error);
-        alert((error as any).response?.data?.message || 'Failed to start game');
-    } finally {
-      setIsSpinning(false);
-    }
-  };
+
+
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -166,22 +126,8 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Wheel of Fortune */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">Roda Keberuntungan</h2>
-            <WheelOfFortune
-              characters={characters}
-              onSpin={handleSpinWheel}
-              isSpinning={isSpinning}
-            />
-          </div>
-        </div>
-
-        {/* Recent Game Sessions */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow p-6">
+      {/* Recent Game Sessions */}
+      <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Sesi Permainan Terbaru</h2>
             
             {recentSessions.length === 0 ? (
@@ -228,8 +174,6 @@ const Dashboard: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
-      </div>
     </div>
   );
 };

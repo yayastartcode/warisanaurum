@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { GameSession, Character, Question, User, IGameSession } from '../models';
 import { AuthRequest } from '../middleware/auth';
 import mongoose from 'mongoose';
+import { validateEssayAnswer } from '../utils/textMatching';
 
 // Spin the wheel to get a random character
 export const spinWheel = async (req: AuthRequest, res: Response) => {
@@ -138,13 +139,13 @@ export const startGameSession = async (req: AuthRequest, res: Response) => {
 export const submitAnswer = async (req: AuthRequest, res: Response) => {
   try {
     const userId = (req.user as any)._id;
-    const { sessionId, questionId, selectedAnswer, timeSpent } = req.body;
+    const { sessionId, questionId, selectedAnswer, textAnswer, timeSpent } = req.body;
 
     // Validation
-    if (!sessionId || !questionId || selectedAnswer === undefined) {
+    if (!sessionId || !questionId) {
       return res.status(400).json({
         success: false,
-        message: 'ID sesi, ID pertanyaan, dan jawaban yang dipilih wajib diisi'
+        message: 'ID sesi dan ID pertanyaan wajib diisi'
       });
     }
 
@@ -191,18 +192,40 @@ export const submitAnswer = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Calculate if answer is correct
-    const isCorrect = selectedAnswer === question.correctAnswer;
+    // Calculate if answer is correct based on question type
+    let isCorrect = false;
+    let answerData: any = {
+      questionId: new mongoose.Types.ObjectId(questionId),
+      timeSpent: timeSpent || 0
+    };
+
+    if (question.questionType === 'multiple_choice') {
+      if (selectedAnswer === undefined) {
+        return res.status(400).json({
+          success: false,
+          message: 'Jawaban yang dipilih wajib diisi untuk pertanyaan pilihan ganda'
+        });
+      }
+      isCorrect = selectedAnswer === question.correctAnswer;
+      answerData.selectedAnswer = selectedAnswer;
+    } else if (question.questionType === 'essay') {
+      if (!textAnswer || !textAnswer.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Jawaban teks wajib diisi untuk pertanyaan essay'
+        });
+      }
+      const validationResult = validateEssayAnswer(textAnswer, question.correctAnswerText || '');
+       isCorrect = validationResult.isCorrect;
+      answerData.textAnswer = textAnswer;
+    }
+
     const pointsEarned = isCorrect ? question.points : 0;
+    answerData.isCorrect = isCorrect;
+    answerData.pointsEarned = pointsEarned;
 
     // Add answer to session
-    session.answers.push({
-      questionId: new mongoose.Types.ObjectId(questionId),
-      selectedAnswer,
-      isCorrect,
-      pointsEarned,
-      timeSpent: timeSpent || 0
-    });
+    session.answers.push(answerData);
 
     // Update session score and progress
     session.score += pointsEarned;
@@ -216,7 +239,7 @@ export const submitAnswer = async (req: AuthRequest, res: Response) => {
       data: {
         isCorrect,
         pointsEarned,
-        correctAnswer: question.correctAnswer,
+        correctAnswer: question.questionType === 'multiple_choice' ? question.correctAnswer : question.correctAnswerText,
         explanation: question.explanation,
         session: {
           _id: session._id,

@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Question, Character, IQuestion } from '../models';
 import { AuthRequest } from '../middleware/auth';
 import mongoose from 'mongoose';
+import { validateEssayAnswer } from '../utils/textMatching';
 
 // Get questions by character ID
 export const getQuestionsByCharacter = async (req: Request, res: Response) => {
@@ -184,8 +185,10 @@ export const getQuizQuestions = async (req: Request, res: Response) => {
         $project: {
           _id: 1,
           question: 1,
+          questionType: 1,
           options: 1,
           correctAnswer: 1,
+          correctAnswerText: 1,
           explanation: 1,
           difficulty: 1,
           points: 1,
@@ -242,30 +245,54 @@ export const createQuestion = async (req: AuthRequest, res: Response) => {
       question,
       options,
       correctAnswer,
+      correctAnswerText,
+      questionType = 'multiple_choice',
       explanation,
       difficulty,
       category
     } = req.body;
 
-    // Validation
-    if (!characterId || !question || !options || correctAnswer === undefined || !explanation) {
+    // Basic validation
+    if (!characterId || !question || !explanation) {
       return res.status(400).json({
         success: false,
-        message: 'Character ID, question, options, correct answer, and explanation are required'
+        message: 'Character ID, question, and explanation are required'
       });
     }
 
-    if (!Array.isArray(options) || options.length !== 4) {
-      return res.status(400).json({
-        success: false,
-        message: 'Options must be an array of exactly 4 items'
-      });
-    }
+    // Validate based on question type
+    if (questionType === 'multiple_choice') {
+      if (!options || correctAnswer === undefined) {
+        return res.status(400).json({
+          success: false,
+          message: 'Options and correct answer are required for multiple choice questions'
+        });
+      }
 
-    if (correctAnswer < 0 || correctAnswer > 3) {
+      if (!Array.isArray(options) || options.length !== 4) {
+        return res.status(400).json({
+          success: false,
+          message: 'Options must be an array of exactly 4 items'
+        });
+      }
+
+      if (correctAnswer < 0 || correctAnswer > 3) {
+        return res.status(400).json({
+          success: false,
+          message: 'Correct answer must be between 0 and 3'
+        });
+      }
+    } else if (questionType === 'essay') {
+      if (!correctAnswerText) {
+        return res.status(400).json({
+          success: false,
+          message: 'Correct answer text is required for essay questions'
+        });
+      }
+    } else {
       return res.status(400).json({
         success: false,
-        message: 'Correct answer must be between 0 and 3'
+        message: 'Question type must be either multiple_choice or essay'
       });
     }
 
@@ -279,15 +306,23 @@ export const createQuestion = async (req: AuthRequest, res: Response) => {
     }
 
     // Create new question
-    const newQuestion = new Question({
+    const questionData: any = {
       characterId,
       question,
-      options,
-      correctAnswer,
+      questionType,
       explanation,
       difficulty: difficulty || 'medium',
       category: category || 'general'
-    });
+    };
+
+    if (questionType === 'multiple_choice') {
+      questionData.options = options;
+      questionData.correctAnswer = correctAnswer;
+    } else if (questionType === 'essay') {
+      questionData.correctAnswerText = correctAnswerText;
+    }
+
+    const newQuestion = new Question(questionData);
 
     await newQuestion.save();
 
@@ -333,20 +368,39 @@ export const updateQuestion = async (req: AuthRequest, res: Response) => {
     delete updateData.createdAt;
     delete updateData.updatedAt;
 
-    // Validate options if provided
-    if (updateData.options && (!Array.isArray(updateData.options) || updateData.options.length !== 4)) {
-      return res.status(400).json({
+    // Get existing question to check type
+    const existingQuestion = await Question.findById(id);
+    if (!existingQuestion) {
+      return res.status(404).json({
         success: false,
-        message: 'Options must be an array of exactly 4 items'
+        message: 'Question not found'
       });
     }
 
-    // Validate correct answer if provided
-    if (updateData.correctAnswer !== undefined && (updateData.correctAnswer < 0 || updateData.correctAnswer > 3)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Correct answer must be between 0 and 3'
-      });
+    const questionType = updateData.questionType || existingQuestion.questionType;
+
+    // Validate based on question type
+    if (questionType === 'multiple_choice') {
+      if (updateData.options && (!Array.isArray(updateData.options) || updateData.options.length !== 4)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Options must be an array of exactly 4 items'
+        });
+      }
+
+      if (updateData.correctAnswer !== undefined && (updateData.correctAnswer < 0 || updateData.correctAnswer > 3)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Correct answer must be between 0 and 3'
+        });
+      }
+    } else if (questionType === 'essay') {
+      if (updateData.correctAnswerText !== undefined && !updateData.correctAnswerText.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Correct answer text cannot be empty for essay questions'
+        });
+      }
     }
 
     const question = await Question.findByIdAndUpdate(

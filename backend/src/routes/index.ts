@@ -3,6 +3,7 @@ import authRoutes from './auth';
 import characterRoutes from './characters';
 import questionRoutes from './questions';
 import gameRoutes from './game';
+import progressRoutes from './progress';
 
 const router = Router();
 
@@ -17,6 +18,9 @@ router.use('/questions', questionRoutes);
 
 // Mount game routes
 router.use('/game', gameRoutes);
+
+// Mount progress routes
+router.use('/progress', progressRoutes);
 
 // Health check endpoint
 router.get('/health', (_req, res) => {

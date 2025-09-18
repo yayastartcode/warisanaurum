@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, Clock, Heart, Star, ArrowLeft, RotateCcw } from 'lucide-react';
+import { Trophy, Clock, Star, ArrowLeft, RotateCcw, Grid3X3 } from 'lucide-react';
 
 interface GameCompleteProps {
   character: {
@@ -8,22 +8,22 @@ interface GameCompleteProps {
   };
   score: number;
   timeElapsed: number;
-  livesRemaining: number;
   totalQuestions: number;
   correctAnswers: number;
   onPlayAgain: () => void;
   onBackToMain: () => void;
+  onBackToLevelSelection?: () => void;
 }
 
 const GameComplete: React.FC<GameCompleteProps> = ({
   character,
   score,
   timeElapsed,
-  livesRemaining,
   totalQuestions,
   correctAnswers,
   onPlayAgain,
-  onBackToMain
+  onBackToMain,
+  onBackToLevelSelection
 }) => {
   // Kata mutiara untuk setiap karakter
   const characterQuotes: { [key: string]: string } = {
@@ -87,7 +87,7 @@ const GameComplete: React.FC<GameCompleteProps> = ({
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div className="bg-yellow-50 rounded-lg p-4 text-center">
               <Trophy className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
               <div className="text-2xl font-bold text-yellow-800">{score}</div>
@@ -100,11 +100,7 @@ const GameComplete: React.FC<GameCompleteProps> = ({
               <div className="text-sm text-blue-600">Waktu</div>
             </div>
             
-            <div className="bg-red-50 rounded-lg p-4 text-center">
-              <Heart className="w-8 h-8 text-red-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-red-800">{livesRemaining}</div>
-              <div className="text-sm text-red-600">Sisa Nyawa</div>
-            </div>
+            {/* Lives display removed - no longer needed */}
             
             <div className="bg-green-50 rounded-lg p-4 text-center">
               <Star className="w-8 h-8 text-green-600 mx-auto mb-2" />
@@ -135,17 +131,28 @@ const GameComplete: React.FC<GameCompleteProps> = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col gap-3">
             <button
               onClick={onPlayAgain}
-              className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               <RotateCcw className="w-5 h-5" />
               Main Lagi
             </button>
+            
+            {onBackToLevelSelection && (
+              <button
+                onClick={onBackToLevelSelection}
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <Grid3X3 className="w-5 h-5" />
+                Pilih Level Lain
+              </button>
+            )}
+            
             <button
               onClick={onBackToMain}
-              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               <ArrowLeft className="w-5 h-5" />
               Pilih Karakter Lain

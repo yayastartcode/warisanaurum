@@ -31,8 +31,10 @@ export interface Question {
   _id: string;
   characterId: string;
   question: string;
-  options: string[];
-  correctAnswer: number;
+  questionType: 'multiple_choice' | 'essay';
+  options?: string[];
+  correctAnswer?: number;
+  correctAnswerText?: string;
   difficulty: 'easy' | 'medium' | 'hard';
   points: number;
   explanation?: string;
@@ -44,7 +46,8 @@ export interface Question {
 // Game Session types
 export interface GameAnswer {
   questionId: string;
-  selectedAnswer: number;
+  selectedAnswer?: number;
+  textAnswer?: string;
   isCorrect: boolean;
   timeSpent: number;
   pointsEarned: number;
@@ -153,8 +156,17 @@ export interface GameSessionResponse {
 export interface SubmitAnswerRequest {
   sessionId: string;
   questionId: string;
-  selectedAnswer: number;
+  selectedAnswer?: number;
+  textAnswer?: string;
   timeSpent: number;
+}
+
+export interface SubmitAnswerResponse {
+  isCorrect: boolean;
+  score: number;
+  currentQuestionIndex: number;
+  answers: GameAnswer[];
+  isGameComplete: boolean;
 }
 
 export interface LeaderboardEntry {

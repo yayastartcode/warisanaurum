@@ -1,0 +1,236 @@
+{
+  "questions": {
+    "Semar": {
+      "1": [
+        {
+          "id": 101,
+          "character": "Semar",
+          "level": 1,
+          "conversation": [
+            {
+              "speaker": "Gareng",
+              "text": "Bapak, kula lingsem matur kaliyan pak guru enggal"
+            },
+            {
+              "speaker": "Semar",
+              "text": "Kok isin? koe ora ndueni salah karo pak guru anyar ta?"
+            },
+            {
+              "speaker": "Gareng",
+              "text": "Mboten pak, kula namung ndredeg dereng tepang"
+            },
+            {
+              "speaker": "Semar",
+              "text": "Yen kowe arep ngajeni uwong sek luwih tuwa cukup nganggo basa …….. lan sikap sing sopan"
+            }
+          ],
+          "questionLine": "Yen kowe arep ngajeni uwong sek luwih tuwa cukup nganggo basa …….. lan sikap sing sopan",
+          "type": "multiple_choice",
+          "options": [
+            "Ngoko Lugu",
+            "Ngoko Alus",
+            "Krama Lugu",
+            "Krama Alus"
+          ],
+          "correctAnswer": 3,
+          "explanation": "Krama Alus digunakan untuk menghormati orang yang lebih tua dengan sopan santun yang tinggi.",
+          "translation": "Krama Alus is used to respect older people with high courtesy."
+        },
+        {
+          "id": 102,
+          "character": "Semar",
+          "level": 1,
+          "conversation": [
+            {
+              "speaker": "Petruk",
+              "text": "Pak bilih wonten tiyang ingkang benten panemu kaliyan kula, pripun?"
+            },
+            {
+              "speaker": "Semar",
+              "text": "Panemune kudu kowe tampa lan dikurmati Truk, aja nganti do ngotot"
+            },
+            {
+              "speaker": "Petruk",
+              "text": "Nangging, piyambakipun tansah ngotot pak"
+            },
+            {
+              "speaker": "Semar",
+              "text": "Yo sebagai ketua koe kudu iso mikir nganggo pikiran jernih, wong sing dewasa kuwi kudu bisa ____"
+            }
+          ],
+          "questionLine": "Wong sing dewasa kuwi kudu bisa ____",
+          "type": "multiple_choice",
+          "options": [
+            "Nentokne pilihane",
+            "Gelut",
+            "Nahan nesune",
+            "Nangis"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Orang dewasa harus bisa menahan amarahnya ketika menghadapi perbedaan pendapat.",
+          "translation": "Adults must be able to control their anger when facing differences of opinion."
+        },
+        {
+          "id": 103,
+          "character": "Semar",
+          "level": 1,
+          "conversation": [
+            {
+              "speaker": "Petruk",
+              "text": "WAHH! wonten gorengan nggih?"
+            },
+            {
+              "speaker": "Semar",
+              "text": "Eh.eh. anake sapa mlebu kok langsung nyelonong ta koe ki, pundi ____?"
+            },
+            {
+              "speaker": "Semar",
+              "text": "Hayo….ora  ____ ayo ___ pundi!"
+            },
+            {
+              "speaker": "Petruk",
+              "text": "Eh bapak, Petruk kesupen"
+            },
+            {
+              "speaker": "Petruk",
+              "text": "Sugeng sonten (kaliyan gujeng lingsem)"
+            },
+            {
+              "speaker": "Semar",
+              "text": "Nah… ____ nak yo anakku"
+            }
+          ],
+          "questionLine": "Tembung sing trep kanggo ngisi ceceg-ceceg yaiku:",
+          "type": "multiple_choice",
+          "options": [
+            "Salame, ora pareng, tata kramane, ngono",
+            "Ngono, salame, tata kramane, ora pareng",
+            "Tata kramane, ora pareng, ngono, salame",
+            "Salame, tata kramane, ora pareng, ngono"
+          ],
+          "correctAnswer": 0,
+          "explanation": "Urutan yang benar adalah: Salame (salamnya), ora pareng (tidak boleh), tata kramane (tata kramanya), ngono (begitu).",
+          "translation": "The correct order is: Salame (the greeting), ora pareng (not allowed), tata kramane (the etiquette), ngono (like that)."
+        }
+      ],
+      "2": [
+        {
+          "id": 2,
+          "character": "Semar",
+          "level": 2,
+          "conversation": [
+            {
+              "speaker": "Semar",
+              "text": "Kebijaksanaan sejati datang dari pengalaman dan kerendahan hati."
+            }
+          ],
+          "questionLine": "Menurut Semar, dari mana kebijaksanaan sejati berasal?",
+          "type": "essay",
+          "correctAnswer": "pengalaman dan kerendahan hati",
+          "explanation": "Semar mengajarkan bahwa kebijaksanaan tidak hanya datang dari pengetahuan, tetapi dari pengalaman hidup dan sikap rendah hati.",
+          "translation": "Semar teaches that wisdom doesn't only come from knowledge, but from life experience and humility."
+        }
+      ]
+    },
+    "Gareng": {
+      "1": [
+        {
+          "id": 3,
+          "character": "Gareng",
+          "level": 1,
+          "conversation": [
+            {
+              "speaker": "Gareng",
+              "text": "Hahaha! Hidup ini harus dinikmati dengan tawa dan kegembiraan!"
+            },
+            {
+              "speaker": "Petruk",
+              "text": "Gareng, apa rahasia kamu selalu bahagia?"
+            }
+          ],
+          "questionLine": "Apa filosofi hidup Gareng?",
+          "type": "multiple_choice",
+          "options": [
+            "Hidup harus serius dan formal",
+            "Hidup harus dinikmati dengan tawa dan kegembiraan",
+            "Hidup harus selalu sedih",
+            "Hidup harus selalu marah"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Gareng mengajarkan bahwa hidup harus dijalani dengan kegembiraan dan tawa, tidak selalu harus serius.",
+          "translation": "Gareng teaches that life should be lived with joy and laughter, not always serious."
+        }
+      ],
+      "2": [
+        {
+          "id": 4,
+          "character": "Gareng",
+          "level": 2,
+          "conversation": [
+            {
+              "speaker": "Gareng",
+              "text": "Tawa adalah obat terbaik untuk hati yang sedih."
+            }
+          ],
+          "questionLine": "Jelaskan mengapa tawa bisa menjadi obat menurut Gareng!",
+          "type": "essay",
+          "correctAnswer": "tawa dapat menyembuhkan kesedihan dan membuat hati menjadi ringan",
+          "explanation": "Gareng percaya bahwa tawa memiliki kekuatan untuk menyembuhkan kesedihan dan membuat beban hidup terasa lebih ringan.",
+          "translation": "Gareng believes that laughter has the power to heal sadness and make life's burdens feel lighter."
+        }
+      ]
+    },
+    "Petruk": {
+      "1": [
+        {
+          "id": 5,
+          "character": "Petruk",
+          "level": 1,
+          "conversation": [
+            {
+              "speaker": "Petruk",
+              "text": "Kecerdikan bukan hanya soal pintar, tapi juga kreatif dalam memecahkan masalah."
+            }
+          ],
+          "questionLine": "Apa yang dimaksud Petruk dengan kecerdikan?",
+          "type": "multiple_choice",
+          "options": [
+            "Hanya kepintaran akademis",
+            "Kombinasi kepintaran dan kreativitas dalam memecahkan masalah",
+            "Hanya kreativitas seni",
+            "Kemampuan menghafal"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Petruk mengajarkan bahwa kecerdikan sejati adalah gabungan antara kepintaran dan kreativitas untuk menyelesaikan masalah.",
+          "translation": "Petruk teaches that true cleverness is a combination of intelligence and creativity to solve problems."
+        }
+      ]
+    },
+    "Bagong": {
+      "1": [
+        {
+          "id": 6,
+          "character": "Bagong",
+          "level": 1,
+          "conversation": [
+            {
+              "speaker": "Bagong",
+              "text": "Keberanian sejati bukan berarti tidak takut, tapi tetap maju meski takut."
+            }
+          ],
+          "questionLine": "Bagaimana Bagong mendefinisikan keberanian sejati?",
+          "type": "multiple_choice",
+          "options": [
+            "Tidak pernah merasa takut",
+            "Tetap maju meskipun merasa takut",
+            "Selalu lari dari masalah",
+            "Hanya berani di depan orang lemah"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Bagong mengajarkan bahwa keberanian sejati adalah kemampuan untuk tetap maju dan menghadapi tantangan meskipun merasa takut.",
+          "translation": "Bagong teaches that true courage is the ability to keep moving forward and face challenges despite feeling afraid."
+        }
+      ]
+    }
+  }
+}

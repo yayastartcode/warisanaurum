@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { apiService } from '../services/api';
 import { Clock, Star, ArrowLeft, CheckCircle, XCircle, Trophy } from 'lucide-react';
-import type { GameSession, Question, Character } from '../types';
+import type { GameSession, Question, Character, SubmitAnswerResponse } from '../types';
 
 const Game: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -14,6 +14,7 @@ const Game: React.FC = () => {
   const [character, setCharacter] = useState<Character | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [textAnswer, setTextAnswer] = useState<string>('');
   const [timeLeft, setTimeLeft] = useState<number>(30);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,6 +73,7 @@ const Game: React.FC = () => {
       }
       setTimeLeft(30); // Reset timer for new question
       setSelectedAnswer(null);
+      setTextAnswer('');
       setShowResult(false);
     } catch (error) {
       console.error('Failed to fetch current question:', error);
@@ -84,38 +86,65 @@ const Game: React.FC = () => {
     }
   };
 
+  const handleTextAnswerChange = (value: string) => {
+    if (!showResult && !isSubmitting) {
+      setTextAnswer(value);
+    }
+  };
+
   const handleSubmitAnswer = async () => {
-    if (selectedAnswer === null || isSubmitting) return;
+    if (!currentQuestion || isSubmitting) return;
+    
+    // Check if answer is provided based on question type
+    if (currentQuestion.questionType === 'multiple_choice' && selectedAnswer === null) return;
+    if (currentQuestion.questionType === 'essay' && textAnswer.trim() === '') return;
     
     setIsSubmitting(true);
     
     try {
-      const response = await apiService.submitAnswer({
-         sessionId: sessionId!,
-         questionId: currentQuestion?._id || '',
-         selectedAnswer,
-         timeSpent: 30 - timeLeft
-       });
+      const submitData: any = {
+        sessionId: sessionId!,
+        questionId: currentQuestion._id || '',
+        timeSpent: 30 - timeLeft
+      };
       
-      const result = response.data.data;
-      if (result && currentQuestion) {
-         const isAnswerCorrect = selectedAnswer === currentQuestion.correctAnswer;
-         setIsCorrect(isAnswerCorrect);
-         setShowResult(true);
+      if (currentQuestion.questionType === 'multiple_choice') {
+        submitData.selectedAnswer = selectedAnswer;
+      } else {
+        submitData.textAnswer = textAnswer;
+      }
+      
+      const response = await apiService.submitAnswer(submitData);
+       
+       const result = response.data?.data as unknown as SubmitAnswerResponse;
+       if (result && currentQuestion) {
+          setIsCorrect(result.isCorrect);
+          setShowResult(true);
         
         // Update game session with new data
-        setGameSession(result.session);
-        
-        // Check if game is over
-        if (result.session.status === 'completed' || result.session.currentQuestionIndex >= result.session.totalQuestions) {
-          setTimeout(() => {
-            setGameOver(true);
-          }, 2000);
-        } else {
-          // Move to next question after showing result
-          setTimeout(() => {
-            fetchCurrentQuestion();
-          }, 2000);
+        if (gameSession) {
+          setGameSession({
+            ...gameSession,
+            score: result.score || gameSession.score,
+            currentQuestionIndex: result.currentQuestionIndex || gameSession.currentQuestionIndex,
+            answers: result.answers || gameSession.answers
+          });
+          
+          // Check if game is complete
+          if (result.isGameComplete) {
+            setTimeout(() => {
+              setGameOver(true);
+            }, 2000);
+          } else {
+            // Move to next question after showing result
+            setTimeout(() => {
+              setShowResult(false);
+              setSelectedAnswer(null);
+              setTextAnswer('');
+              setTimeLeft(30);
+              fetchCurrentQuestion();
+            }, 2000);
+          }
         }
       }
     } catch (error) {
@@ -239,46 +268,73 @@ const Game: React.FC = () => {
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <h3 className="text-xl font-bold text-gray-800 mb-6">{currentQuestion.question}</h3>
           
-          <div className="space-y-3">
-            {currentQuestion.options.map((option, index) => {
-              let buttonClass = "w-full p-4 text-left border-2 rounded-lg transition-all duration-200 ";
-              
-              if (showResult) {
-                if (index === currentQuestion.correctAnswer) {
-                  buttonClass += "border-green-500 bg-green-50 text-green-800";
-                } else if (index === selectedAnswer && selectedAnswer !== currentQuestion.correctAnswer) {
-                  buttonClass += "border-red-500 bg-red-50 text-red-800";
+          {currentQuestion.questionType === 'multiple_choice' ? (
+            <div className="space-y-3">
+              {currentQuestion.options?.map((option, index) => {
+                let buttonClass = "w-full p-4 text-left border-2 rounded-lg transition-all duration-200 ";
+                
+                if (showResult) {
+                  if (index === currentQuestion.correctAnswer) {
+                    buttonClass += "border-green-500 bg-green-50 text-green-800";
+                  } else if (index === selectedAnswer && selectedAnswer !== currentQuestion.correctAnswer) {
+                    buttonClass += "border-red-500 bg-red-50 text-red-800";
+                  } else {
+                    buttonClass += "border-gray-200 bg-gray-50 text-gray-500";
+                  }
                 } else {
-                  buttonClass += "border-gray-200 bg-gray-50 text-gray-500";
+                  if (selectedAnswer === index) {
+                    buttonClass += "border-purple-500 bg-purple-50 text-purple-800";
+                  } else {
+                    buttonClass += "border-gray-200 hover:border-purple-300 hover:bg-purple-50";
+                  }
                 }
-              } else {
-                if (selectedAnswer === index) {
-                  buttonClass += "border-purple-500 bg-purple-50 text-purple-800";
-                } else {
-                  buttonClass += "border-gray-200 hover:border-purple-300 hover:bg-purple-50";
-                }
-              }
-              
-              return (
-                <button
-                  key={index}
-                  onClick={() => handleAnswerSelect(index)}
-                  disabled={showResult || isSubmitting}
-                  className={buttonClass}
-                >
-                  <div className="flex items-center justify-between">
-                    <span>{option}</span>
-                    {showResult && index === currentQuestion.correctAnswer && (
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                    )}
-                    {showResult && index === selectedAnswer && selectedAnswer !== currentQuestion.correctAnswer && (
-                      <XCircle className="w-5 h-5 text-red-600" />
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleAnswerSelect(index)}
+                    disabled={showResult || isSubmitting}
+                    className={buttonClass}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>{option}</span>
+                      {showResult && index === currentQuestion.correctAnswer && (
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                      )}
+                      {showResult && index === selectedAnswer && selectedAnswer !== currentQuestion.correctAnswer && (
+                        <XCircle className="w-5 h-5 text-red-600" />
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="text-sm text-gray-600 mb-2">
+                Ketik jawaban Anda di bawah ini:
+              </div>
+              <textarea
+                value={textAnswer}
+                onChange={(e) => handleTextAnswerChange(e.target.value)}
+                disabled={showResult || isSubmitting}
+                placeholder="Masukkan jawaban Anda..."
+                className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none resize-none h-32 disabled:bg-gray-50 disabled:text-gray-500"
+              />
+              {showResult && (
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                  <div className="text-sm font-semibold text-blue-800 mb-2">Jawaban yang benar:</div>
+                  <div className="text-blue-700">{currentQuestion.correctAnswerText}</div>
+                  {textAnswer && (
+                    <div className="mt-2">
+                      <div className="text-sm font-semibold text-blue-800 mb-1">Jawaban Anda:</div>
+                      <div className="text-blue-700">{textAnswer}</div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Submit Button */}
@@ -286,7 +342,11 @@ const Game: React.FC = () => {
           <div className="text-center">
             <button
               onClick={handleSubmitAnswer}
-              disabled={selectedAnswer === null || isSubmitting}
+              disabled={
+                (currentQuestion.questionType === 'multiple_choice' && selectedAnswer === null) ||
+                (currentQuestion.questionType === 'essay' && textAnswer.trim() === '') ||
+                isSubmitting
+              }
               className="bg-white text-purple-600 font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Mengirim...' : 'Kirim Jawaban'}

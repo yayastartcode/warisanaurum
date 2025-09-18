@@ -2,7 +2,8 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IGameAnswer {
   questionId: mongoose.Types.ObjectId;
-  selectedAnswer: number;
+  selectedAnswer?: number; // for multiple choice
+  textAnswer?: string; // for essay questions
   isCorrect: boolean;
   timeSpent: number; // in seconds
   pointsEarned: number;
@@ -33,9 +34,15 @@ const GameAnswerSchema: Schema = new Schema({
   },
   selectedAnswer: {
     type: Number,
-    required: true,
+    required: false,
     min: [0, 'Jawaban yang dipilih minimal 0'],
     max: [3, 'Jawaban yang dipilih tidak boleh lebih dari 3']
+  },
+  textAnswer: {
+    type: String,
+    required: false,
+    trim: true,
+    maxlength: [1000, 'Jawaban text tidak boleh lebih dari 1000 karakter']
   },
   isCorrect: {
     type: Boolean,

@@ -65,17 +65,28 @@ class ApiService {
           
           try {
             const refreshToken = localStorage.getItem('refreshToken');
+            console.log('Attempting token refresh due to 401 error');
+            
             if (refreshToken) {
               const response = await this.refreshToken(refreshToken);
                const { accessToken, refreshToken: newRefreshToken } = response.data.tokens;
                
+               console.log('Token refresh successful');
                localStorage.setItem('accessToken', accessToken);
                localStorage.setItem('refreshToken', newRefreshToken);
               originalRequest.headers.Authorization = `Bearer ${accessToken}`;
               
               return this.api(originalRequest);
+            } else {
+              console.log('No refresh token found, redirecting to login');
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('refreshToken');
+              localStorage.removeItem('user');
+              window.location.href = '/login';
             }
           } catch (refreshError: any) {
+            console.error('Token refresh failed:', refreshError);
+            
             // If refresh fails due to rate limiting, don't redirect immediately
             if (refreshError.response?.status === 429) {
               return Promise.reject(error);
