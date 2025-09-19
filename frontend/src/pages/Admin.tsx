@@ -1,13 +1,25 @@
 import React, { useState } from 'react';
-import { FileText, BarChart3, Settings, Home } from 'lucide-react';
-import QuestionManagement from '../components/admin/QuestionManagement';
+import { BarChart3, Settings, Home, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import UserAnalytics from '../components/admin/UserAnalytics';
 import AdminDashboard from '../components/admin/AdminDashboard';
 
-type AdminTab = 'dashboard' | 'questions' | 'analytics' | 'settings';
+type AdminTab = 'dashboard' | 'analytics' | 'settings';
 
 const Admin: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   const tabs = [
     {
@@ -15,12 +27,6 @@ const Admin: React.FC = () => {
       label: 'Dashboard',
       icon: Home,
       component: AdminDashboard
-    },
-    {
-      id: 'questions' as AdminTab,
-      label: 'Manajemen Pertanyaan',
-      icon: FileText,
-      component: QuestionManagement
     },
     {
       id: 'analytics' as AdminTab,
@@ -55,6 +61,13 @@ const Admin: React.FC = () => {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-500">Warum Game Admin</span>
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-2 text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
+              </button>
             </div>
           </div>
         </div>

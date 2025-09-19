@@ -2,15 +2,8 @@ import { Router } from 'express';
 import {
   getUserAnalytics,
   getAdminStats,
-  bulkCreateQuestions,
   exportUserAnalytics
 } from '../controllers/adminController';
-import {
-  createQuestion,
-  updateQuestion,
-  deleteQuestion,
-  getQuestionStats
-} from '../controllers/questionController';
 import { authenticate, requireAdmin } from '../middleware/auth';
 
 const router = Router();
@@ -90,12 +83,7 @@ router.get('/stats', getAdminStats);
 router.get('/users/analytics', getUserAnalytics);
 router.get('/users/export', exportUserAnalytics);
 
-// Question management routes
-router.post('/questions', createQuestion);
-router.post('/questions/bulk', bulkCreateQuestions);
-router.put('/questions/:id', updateQuestion);
-router.delete('/questions/:id', deleteQuestion);
-router.get('/questions/stats', getQuestionStats);
+
 
 // Admin user management
 router.post('/create-admin', async (req, res) => {

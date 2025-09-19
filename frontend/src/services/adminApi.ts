@@ -43,24 +43,7 @@ export interface AdminStats {
   }>;
 }
 
-export interface QuestionFormData {
-  characterId: string;
-  question: string;
-  questionType: 'multiple_choice' | 'essay';
-  options?: string[];
-  correctAnswer?: number;
-  correctAnswerText?: string;
-  explanation: string;
-  difficulty: 'easy' | 'medium' | 'hard';
-  category: 'origin' | 'history' | 'culture' | 'facts' | 'general';
-  points?: number;
-  translation?: {
-    conversation?: string[];
-    questionLine?: string;
-    options?: string[];
-    correctAnswerText?: string;
-  };
-}
+
 
 class AdminApiService {
   private api: AxiosInstance;
@@ -113,54 +96,7 @@ class AdminApiService {
     return response.data;
   }
 
-  // Create a new question
-  async createQuestion(questionData: QuestionFormData) {
-    const response = await this.api.post('/admin/questions', questionData);
-    return response.data;
-  }
 
-  // Update an existing question
-  async updateQuestion(id: string, questionData: Partial<QuestionFormData>) {
-    const response = await this.api.put(`/admin/questions/${id}`, questionData);
-    return response.data;
-  }
-
-  // Delete a question
-  async deleteQuestion(id: string) {
-    const response = await this.api.delete(`/admin/questions/${id}`);
-    return response.data;
-  }
-
-  // Bulk create questions
-  async bulkCreateQuestions(questions: QuestionFormData[]) {
-    const response = await this.api.post('/admin/questions/bulk', { questions });
-    return response.data;
-  }
-
-  // Get question statistics
-  async getQuestionStats() {
-    const response = await this.api.get('/admin/questions/stats');
-    return response.data;
-  }
-
-  // Get all characters for dropdown
-  async getCharacters() {
-    const response = await this.api.get('/characters');
-    return response.data.data;
-  }
-
-  // Get questions with filtering
-  async getQuestions(params: {
-    page?: number;
-    limit?: number;
-    characterId?: string;
-    difficulty?: string;
-    category?: string;
-    search?: string;
-  } = {}) {
-    const response = await this.api.get('/questions', { params });
-    return response.data;
-  }
 }
 
 export const adminApi = new AdminApiService();

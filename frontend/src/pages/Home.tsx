@@ -26,7 +26,7 @@ const Home: React.FC = () => {
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Halo, {user?.username || 'Pengguna'}</span>
               <Link
-                to="/dashboard"
+                to={user?.role === 'admin' ? '/admin' : '/dashboard'}
                 className="text-blue-600 hover:text-blue-800 font-medium"
               >
                 Dashboard

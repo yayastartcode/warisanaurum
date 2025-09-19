@@ -9,6 +9,7 @@ export interface User {
   achievements: string[];
   level: number;
   experience: number;
+  role: 'user' | 'admin';
   createdAt: string;
   updatedAt: string;
 }

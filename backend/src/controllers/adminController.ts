@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { User, GameSession, Question, Character } from '../models';
+import UserProgress from '../models/UserProgress';
 import { AuthRequest } from '../middleware/auth';
 import mongoose from 'mongoose';
 
@@ -18,47 +19,61 @@ export const getUserAnalytics = async (req: AuthRequest, res: Response) => {
     const limitNum = parseInt(limit as string, 10);
     const skip = (pageNum - 1) * limitNum;
 
-    // Build search filter
-    const searchFilter: any = {};
-    if (search) {
-      searchFilter.$or = [
-        { username: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } }
-      ];
-    }
+    // Build search filter for userDetails
+      const searchFilter: any = {};
+      if (search) {
+        searchFilter.$or = [
+          { 'userDetails.username': { $regex: search, $options: 'i' } },
+          { 'userDetails.email': { $regex: search, $options: 'i' } }
+        ];
+      }
 
     // Build sort object
     const sortObj: any = {};
     sortObj[sortBy as string] = sortOrder === 'desc' ? -1 : 1;
 
     // Get users with analytics data
-    const users = await User.aggregate([
-      { $match: searchFilter },
+    const users = await UserProgress.aggregate([
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'userInfo'
+        }
+      },
       {
         $lookup: {
           from: 'gamesessions',
-          localField: '_id',
+          localField: 'userId',
           foreignField: 'userId',
           as: 'gameSessions'
         }
       },
       {
         $addFields: {
+          userDetails: { $arrayElemAt: ['$userInfo', 0] },
           totalPlayTime: {
-            $sum: {
-              $map: {
-                input: '$gameSessions',
-                as: 'session',
-                in: {
-                  $subtract: [
-                    { $ifNull: ['$$session.completedAt', '$$session.updatedAt'] },
-                    '$$session.startedAt'
-                  ]
-                }
-              }
-            }
+            $divide: [
+              {
+                $subtract: [
+                  '$updatedAt',
+                  '$createdAt'
+                ]
+              },
+              60000
+            ]
           },
-          lastGameSession: {
+          calculatedTotalScore: {
+            $sum: '$gameSessions.score'
+          },
+          calculatedGamesPlayed: {
+            $size: '$gameSessions'
+          },
+          calculatedHighestScore: {
+            $max: '$gameSessions.score'
+          },
+          lastLogin: {
             $max: '$gameSessions.startedAt'
           },
           completedGames: {
@@ -68,23 +83,44 @@ export const getUserAnalytics = async (req: AuthRequest, res: Response) => {
                 cond: { $eq: ['$$this.status', 'completed'] }
               }
             }
+          },
+          highestScore: {
+            $max: {
+              $map: {
+                input: '$characters',
+                as: 'char',
+                in: {
+                  $max: {
+                    $map: {
+                      input: '$$char.levels',
+                      as: 'level',
+                      in: '$$level.bestScore'
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
       {
+        $match: searchFilter
+      },
+      {
         $project: {
-          username: 1,
-          email: 1,
-          totalScore: 1,
-          gamesPlayed: 1,
+          _id: '$userDetails._id',
+          username: '$userDetails.username',
+          email: '$userDetails.email',
+          totalScore: '$totalScore',
+          gamesPlayed: '$totalGamesPlayed',
           highestScore: 1,
-          level: 1,
-          experience: 1,
+          level: '$currentLevel',
+          experience: '$userDetails.experience',
+          completedGames: '$totalGamesCompleted',
           totalPlayTime: 1,
-          lastLogin: '$lastGameSession',
-          completedGames: 1,
-          createdAt: 1,
-          updatedAt: 1
+          lastLogin: '$lastPlayedAt',
+          createdAt: '$userDetails.createdAt',
+          updatedAt: '$userDetails.updatedAt'
         }
       },
       { $sort: sortObj },
@@ -93,16 +129,60 @@ export const getUserAnalytics = async (req: AuthRequest, res: Response) => {
     ]);
 
     // Get total count for pagination
-    const totalUsers = await User.countDocuments(searchFilter);
+    const totalUsers = await UserProgress.aggregate([
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'userInfo'
+        }
+      },
+      {
+        $addFields: {
+          userDetails: { $arrayElemAt: ['$userInfo', 0] }
+        }
+      },
+      {
+        $match: searchFilter
+      },
+      {
+        $count: 'total'
+      }
+    ]);
+    const totalUsersCount = totalUsers[0]?.total || 0;
 
     // Calculate summary statistics
-    const summaryStats = await User.aggregate([
+    const summaryStats = await UserProgress.aggregate([
+      {
+        $addFields: {
+          highestScore: {
+            $max: {
+              $map: {
+                input: '$characters',
+                as: 'char',
+                in: {
+                  $max: {
+                    $map: {
+                      input: '$$char.levels',
+                      as: 'level',
+                      in: '$$level.bestScore'
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       {
         $group: {
           _id: null,
           totalUsers: { $sum: 1 },
+          totalScore: { $sum: '$totalScore' },
+          totalGamesPlayed: { $sum: '$totalGamesPlayed' },
+          totalGamesCompleted: { $sum: '$totalGamesCompleted' },
           averageScore: { $avg: '$totalScore' },
-          totalGamesPlayed: { $sum: '$gamesPlayed' },
           highestScore: { $max: '$highestScore' }
         }
       }
@@ -121,8 +201,8 @@ export const getUserAnalytics = async (req: AuthRequest, res: Response) => {
         users,
         pagination: {
           currentPage: pageNum,
-          totalPages: Math.ceil(totalUsers / limitNum),
-          totalUsers,
+          totalPages: Math.ceil(totalUsersCount / limitNum),
+          totalUsers: totalUsersCount,
           limit: limitNum
         },
         summary
@@ -173,11 +253,51 @@ export const getAdminStats = async (req: AuthRequest, res: Response) => {
       { $sort: { '_id': 1 } }
     ]);
 
-    // Get top players
-    const topPlayers = await User.find()
-      .select('username totalScore highestScore gamesPlayed')
-      .sort({ totalScore: -1 })
-      .limit(5);
+    // Get top players from UserProgress
+    const topPlayers = await UserProgress.aggregate([
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'userInfo'
+        }
+      },
+      {
+        $unwind: '$userInfo'
+      },
+      {
+        $lookup: {
+          from: 'gamesessions',
+          localField: 'userId',
+          foreignField: 'userId',
+          as: 'gameSessions'
+        }
+      },
+      {
+        $addFields: {
+          username: '$userInfo.username',
+          gamesPlayed: { $size: '$gameSessions' },
+          highestScore: {
+            $ifNull: [
+              { $max: '$gameSessions.score' },
+              0
+            ]
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          username: 1,
+          totalScore: 1,
+          highestScore: 1,
+          gamesPlayed: 1
+        }
+      },
+      { $sort: { totalScore: -1 } },
+      { $limit: 5 }
+    ]);
 
     // Get question statistics by character
     const questionStats = await Question.aggregate([
@@ -228,126 +348,74 @@ export const getAdminStats = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Bulk create questions from admin panel
-export const bulkCreateQuestions = async (req: AuthRequest, res: Response) => {
-  try {
-    const { questions } = req.body;
-
-    if (!Array.isArray(questions) || questions.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Questions array is required and cannot be empty'
-      });
-    }
-
-    const createdQuestions = [];
-    const errors = [];
-
-    for (let i = 0; i < questions.length; i++) {
-      try {
-        const questionData = questions[i];
-        
-        // Validate required fields
-        if (!questionData.characterId || !questionData.question || !questionData.explanation) {
-          errors.push({
-            index: i,
-            message: 'Character ID, question, and explanation are required'
-          });
-          continue;
-        }
-
-        // Validate character exists
-        const character = await Character.findById(questionData.characterId);
-        if (!character) {
-          errors.push({
-            index: i,
-            message: 'Character not found'
-          });
-          continue;
-        }
-
-        // Create question
-        const newQuestion = new Question({
-          ...questionData,
-          difficulty: questionData.difficulty || 'medium',
-          category: questionData.category || 'general',
-          questionType: questionData.questionType || 'multiple_choice'
-        });
-
-        await newQuestion.save();
-        await newQuestion.populate('characterId', 'name category difficulty');
-        
-        createdQuestions.push(newQuestion);
-      } catch (error: any) {
-        errors.push({
-          index: i,
-          message: error.message || 'Failed to create question'
-        });
-      }
-    }
-
-    res.status(201).json({
-      success: true,
-      message: `Successfully created ${createdQuestions.length} questions`,
-      data: {
-        created: createdQuestions,
-        errors
-      }
-    });
-  } catch (error) {
-    console.error('Bulk create questions error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error while creating questions'
-    });
-  }
-};
-
 // Export user analytics data as CSV
 export const exportUserAnalytics = async (req: AuthRequest, res: Response) => {
   try {
-    const users = await User.aggregate([
-      {
-        $lookup: {
-          from: 'gamesessions',
-          localField: '_id',
-          foreignField: 'userId',
-          as: 'gameSessions'
-        }
-      },
-      {
-        $addFields: {
-          totalPlayTime: {
-            $sum: {
-              $map: {
-                input: '$gameSessions',
-                as: 'session',
-                in: {
+    const users = await UserProgress.aggregate([
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'userInfo'
+          }
+        },
+        {
+          $lookup: {
+            from: 'gamesessions',
+            localField: 'userId',
+            foreignField: 'userId',
+            as: 'gameSessions'
+          }
+        },
+        {
+          $addFields: {
+            userDetails: { $arrayElemAt: ['$userInfo', 0] },
+            totalPlayTime: {
+              $divide: [
+                {
                   $subtract: [
-                    { $ifNull: ['$$session.completedAt', '$$session.updatedAt'] },
-                    '$$session.startedAt'
+                    '$updatedAt',
+                    '$createdAt'
                   ]
+                },
+                60000
+              ]
+            },
+            lastLogin: '$lastPlayedAt',
+            highestScore: {
+              $max: {
+                $map: {
+                  input: '$characters',
+                  as: 'char',
+                  in: {
+                    $max: {
+                      $map: {
+                        input: '$$char.levels',
+                        as: 'level',
+                        in: '$$level.bestScore'
+                      }
+                    }
+                  }
                 }
               }
             }
-          },
-          lastGameSession: {
-            $max: '$gameSessions.startedAt'
           }
-        }
-      },
+        },
       {
         $project: {
-          username: 1,
-          email: 1,
-          totalScore: 1,
-          gamesPlayed: 1,
+          _id: '$userDetails._id',
+          username: '$userDetails.username',
+          email: '$userDetails.email',
+          totalScore: '$totalScore',
+          gamesPlayed: '$totalGamesPlayed',
           highestScore: 1,
-          level: 1,
-          experience: 1,
+          level: '$currentLevel',
+          experience: '$userDetails.experience',
+          completedGames: '$totalGamesCompleted',
           totalPlayTime: 1,
-          lastLogin: '$lastGameSession',
-          createdAt: 1
+          lastLogin: 1,
+          createdAt: '$userDetails.createdAt'
         }
       },
       { $sort: { totalScore: -1 } }

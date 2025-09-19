@@ -41,7 +41,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {isAuthenticated && (
               <div className="flex items-center space-x-4">
                 <Link
-                  to="/dashboard"
+                  to={user?.role === 'admin' ? '/admin' : '/dashboard'}
                   className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   <Home size={16} />

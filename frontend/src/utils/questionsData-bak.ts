@@ -1,5 +1,4 @@
 // Data pertanyaan yang digunakan dalam aplikasi
-// Diimpor dari QuestionManager.tsx
 
 export interface Question {
   id: number;

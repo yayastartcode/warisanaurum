@@ -14,19 +14,27 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
 
-  const { login } = useAuth();
+  const { login, user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   // Get the intended destination or default to home
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
 
-  // Navigate after successful login
+  // Navigate after successful login or if already logged in
   useEffect(() => {
-    if (loginSuccess) {
-      navigate(from, { replace: true });
+    if (user && !authLoading) {
+      // If user just logged in successfully or already logged in
+      if (loginSuccess || (user.role === 'admin' && location.pathname === '/login')) {
+        // Redirect admin to admin panel, regular users to intended destination
+        if (user.role === 'admin') {
+          navigate('/admin', { replace: true });
+        } else {
+          navigate(from, { replace: true });
+        }
+      }
     }
-  }, [loginSuccess, navigate, from]);
+  }, [loginSuccess, user, authLoading, navigate, from, location.pathname]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

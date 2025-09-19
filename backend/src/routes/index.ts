@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import authRoutes from './auth';
 import characterRoutes from './characters';
-import questionRoutes from './questions';
 import gameRoutes from './game';
 import progressRoutes from './progress';
 import adminRoutes from './admin';
@@ -14,8 +13,7 @@ router.use('/auth', authRoutes);
 // Mount character routes
 router.use('/characters', characterRoutes);
 
-// Mount question routes
-router.use('/questions', questionRoutes);
+
 
 // Mount game routes
 router.use('/game', gameRoutes);

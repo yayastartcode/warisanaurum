@@ -1,28 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { Users, Clock, Trophy, TrendingUp, Download } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Users, Clock, Trophy, TrendingUp, Download, RefreshCw } from 'lucide-react';
 import { adminApi, type UserAnalytic } from '../../services/adminApi';
 
 // UserAnalytic interface is now imported from adminApi
 
 const UserAnalytics: React.FC = () => {
   const [users, setUsers] = useState<UserAnalytic[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<UserAnalytic[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<keyof UserAnalytic>('totalScore');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const intervalRef = useRef<number | null>(null);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
     totalUsers: 0,
     limit: 10
   });
+  const [summary, setSummary] = useState({
+    totalUsers: 0,
+    averageScore: 0,
+    totalGamesPlayed: 0,
+    highestScore: 0
+  });
 
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      
       const response = await adminApi.getUserAnalytics({
         page: currentPage,
         limit: usersPerPage,
@@ -30,61 +44,68 @@ const UserAnalytics: React.FC = () => {
         sortOrder,
         search: searchTerm
       });
-      setUsers(response.data);
-      setFilteredUsers(response.data);
-      setPagination(prev => ({
-        ...prev,
-        totalPages: response.pagination?.totalPages || 1,
-        totalUsers: response.pagination?.total || 0
-      }));
+      
+      setUsers(response.users);
+        setPagination({
+          currentPage: response.pagination?.currentPage || 1,
+          totalPages: response.pagination?.totalPages || 1,
+          totalUsers: response.pagination?.totalUsers || 0,
+          limit: response.pagination?.limit || 10
+        });
+        
+        // Update summary from backend response
+        if (response.summary) {
+          setSummary(response.summary);
+        }
+      
+      setLastUpdated(new Date());
     } catch (error) {
       console.error('Error loading analytics:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, [currentPage, usersPerPage, sortBy, sortOrder, searchTerm]);
 
   useEffect(() => {
     loadAnalytics();
-  }, [currentPage, sortBy, sortOrder, searchTerm]);
+  }, [currentPage, searchTerm, sortBy, sortOrder, loadAnalytics]);
 
-  // Filter and search users
+  // Auto-refresh effect
   useEffect(() => {
-    let filtered = users || [];
-
-    if (searchTerm) {
-      filtered = filtered.filter(user => 
-        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    if (autoRefresh) {
+      intervalRef.current = window.setInterval(() => {
+        loadAnalytics(true);
+      }, 30000); // Refresh every 30 seconds
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     }
 
-    // Sort users
-    filtered.sort((a, b) => {
-      const aValue = a[sortBy];
-      const bValue = b[sortBy];
-      
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortOrder === 'asc' 
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
       }
-      
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
-      }
-      
-      return 0;
-    });
+    };
+  }, [autoRefresh, loadAnalytics]);
 
-    setFilteredUsers(filtered);
-  }, [users, searchTerm, sortBy, sortOrder]);
+  // Manual refresh function
+  const handleManualRefresh = () => {
+    loadAnalytics(true);
+  };
 
-  // Pagination
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = (filteredUsers || []).slice(indexOfFirstUser, indexOfLastUser);
-  const totalPages = Math.ceil((filteredUsers || []).length / usersPerPage);
+  // Toggle auto-refresh
+  const toggleAutoRefresh = () => {
+    setAutoRefresh(!autoRefresh);
+  };
+
+  // Since backend handles pagination, we use users directly
+  const currentUsers = users || [];
+  const totalPages = pagination.totalPages;
+  const indexOfFirstUser = (pagination.currentPage - 1) * pagination.limit;
+  const indexOfLastUser = Math.min(indexOfFirstUser + pagination.limit, pagination.totalUsers);
 
   const handleSort = (column: keyof UserAnalytic) => {
     if (sortBy === column) {
@@ -96,12 +117,20 @@ const UserAnalytics: React.FC = () => {
   };
 
   const formatPlayTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return hours > 0 ? `${hours}j ${mins}m` : `${mins}m`;
+    const totalMinutes = Math.round(minutes);
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    
+    if (hours > 0) {
+      return `${hours}j ${mins}m`;
+    } else if (mins > 0) {
+      return `${mins}m`;
+    } else {
+      return '< 1m';
+    }
   };
 
-  const formatLastLogin = (dateString: string) => {
+  const formatLastPlayed = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('id-ID', {
       year: 'numeric',
@@ -130,10 +159,8 @@ const UserAnalytics: React.FC = () => {
     }
   };
 
-  // Calculate summary statistics
-  const totalUsers = (users || []).length;
+  // Calculate additional statistics from current page data
   const totalPlayTime = (users || []).reduce((sum, user) => sum + user.totalPlayTime, 0);
-  const averageScore = (users || []).length > 0 ? (users || []).reduce((sum, user) => sum + (user.gamesPlayed > 0 ? user.totalScore / user.gamesPlayed : 0), 0) / (users || []).length : 0;
   const activeUsersToday = (users || []).filter(user => {
     const lastLogin = new Date(user.lastLogin);
     const today = new Date();
@@ -144,15 +171,52 @@ const UserAnalytics: React.FC = () => {
     <div className="p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Analytics User</h2>
-        <button
-          onClick={exportToCSV}
-          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
-        >
-          <Download className="h-4 w-4" />
-          Export CSV
-        </button>
-      </div>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Analytics User</h2>
+          {lastUpdated && (
+            <p className="text-sm text-gray-500 mt-1">
+              Terakhir diperbarui: {lastUpdated.toLocaleTimeString('id-ID')}
+            </p>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          {/* Auto-refresh toggle */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-600">Auto-refresh:</label>
+            <button
+              onClick={toggleAutoRefresh}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                autoRefresh ? 'bg-blue-600' : 'bg-gray-200'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  autoRefresh ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+          
+          {/* Manual refresh button */}
+          <button
+            onClick={handleManualRefresh}
+            disabled={refreshing}
+            className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Memperbarui...' : 'Refresh'}
+          </button>
+          
+          {/* Export button */}
+          <button
+            onClick={exportToCSV}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Export CSV
+          </button>
+         </div>
+       </div>
 
       {/* Loading State */}
       {loading && (
@@ -161,14 +225,26 @@ const UserAnalytics: React.FC = () => {
         </div>
       )}
 
+      {/* Realtime Status Indicator */}
+      {autoRefresh && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-sm text-green-700 font-medium">
+              Data diperbarui secara realtime setiap 30 detik
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
           <div className="flex items-center">
             <Users className="h-8 w-8 text-blue-600 mr-3" />
             <div>
               <p className="text-sm font-medium text-blue-600">Total User</p>
-              <p className="text-2xl font-bold text-blue-900">{totalUsers}</p>
+              <p className="text-2xl font-bold text-blue-900">{summary.totalUsers}</p>
             </div>
           </div>
         </div>
@@ -187,8 +263,8 @@ const UserAnalytics: React.FC = () => {
           <div className="flex items-center">
             <Trophy className="h-8 w-8 text-yellow-600 mr-3" />
             <div>
-              <p className="text-sm font-medium text-yellow-600">Rata-rata Skor</p>
-              <p className="text-2xl font-bold text-yellow-900">{averageScore.toFixed(1)}</p>
+              <p className="text-sm font-medium text-yellow-600">Total Games</p>
+              <p className="text-2xl font-bold text-yellow-900">{summary.totalGamesPlayed}</p>
             </div>
           </div>
         </div>
@@ -197,8 +273,28 @@ const UserAnalytics: React.FC = () => {
           <div className="flex items-center">
             <TrendingUp className="h-8 w-8 text-purple-600 mr-3" />
             <div>
-              <p className="text-sm font-medium text-purple-600">Aktif Hari Ini</p>
-              <p className="text-2xl font-bold text-purple-900">{activeUsersToday}</p>
+              <p className="text-sm font-medium text-purple-600">Skor Tertinggi</p>
+              <p className="text-2xl font-bold text-purple-900">{summary.highestScore}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-indigo-50 p-6 rounded-lg border border-indigo-200">
+          <div className="flex items-center">
+            <Trophy className="h-8 w-8 text-indigo-600 mr-3" />
+            <div>
+              <p className="text-sm font-medium text-indigo-600">Rata-rata Skor</p>
+              <p className="text-2xl font-bold text-indigo-900">{summary.averageScore.toFixed(1)}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-pink-50 p-6 rounded-lg border border-pink-200">
+          <div className="flex items-center">
+            <Users className="h-8 w-8 text-pink-600 mr-3" />
+            <div>
+              <p className="text-sm font-medium text-pink-600">Aktif Hari Ini</p>
+              <p className="text-2xl font-bold text-pink-900">{activeUsersToday}</p>
             </div>
           </div>
         </div>
@@ -224,7 +320,7 @@ const UserAnalytics: React.FC = () => {
             >
               <option value="totalScore">Total Skor</option>
               <option value="totalPlayTime">Waktu Bermain</option>
-              <option value="lastLogin">Terakhir Login</option>
+              <option value="lastLogin">Terakhir Bermain</option>
               <option value="gamesPlayed">Game Dimainkan</option>
             </select>
             <select
@@ -270,7 +366,7 @@ const UserAnalytics: React.FC = () => {
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('lastLogin')}
                 >
-                  Terakhir Login {sortBy === 'lastLogin' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  Terakhir Bermain {sortBy === 'lastLogin' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
                 <th 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
@@ -284,9 +380,6 @@ const UserAnalytics: React.FC = () => {
                   >
                     Skor Tertinggi {sortBy === 'highestScore' && (sortOrder === 'asc' ? '↑' : '↓')}
                   </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Karakter/Level
-                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -305,23 +398,13 @@ const UserAnalytics: React.FC = () => {
                     {formatPlayTime(user.totalPlayTime)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatLastLogin(user.lastLogin)}
+                    {formatLastPlayed(user.lastLogin)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {user.gamesPlayed}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <span className="font-semibold text-green-600">{user.gamesPlayed > 0 ? (user.totalScore / user.gamesPlayed).toFixed(1) : '0.0'}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div className="flex items-center">
-                      <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full mr-2">
-                        -
-                      </span>
-                      <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-                        Lv.{user.level}
-                      </span>
-                    </div>
                   </td>
                 </tr>
               ))}
@@ -334,12 +417,12 @@ const UserAnalytics: React.FC = () => {
       {totalPages > 1 && (
         <div className="flex justify-between items-center mt-4">
             <div className="text-sm text-gray-700">
-              Menampilkan {indexOfFirstUser + 1}-{Math.min(indexOfLastUser, (filteredUsers || []).length)} dari {(filteredUsers || []).length} user (Halaman {currentPage} dari {totalPages}, Total: {pagination.totalUsers})
+              Menampilkan {indexOfFirstUser + 1}-{indexOfLastUser} dari {pagination.totalUsers} user (Halaman {pagination.currentPage} dari {totalPages})
             </div>
           <div className="flex space-x-2">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
+              disabled={pagination.currentPage === 1}
               className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Sebelumnya
@@ -350,7 +433,7 @@ const UserAnalytics: React.FC = () => {
                 key={page}
                 onClick={() => setCurrentPage(page)}
                 className={`px-3 py-2 rounded-md ${
-                  currentPage === page
+                  pagination.currentPage === page
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
@@ -361,7 +444,7 @@ const UserAnalytics: React.FC = () => {
             
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
+              disabled={pagination.currentPage === totalPages}
               className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Selanjutnya
@@ -370,7 +453,7 @@ const UserAnalytics: React.FC = () => {
         </div>
       )}
 
-      {!loading && (filteredUsers || []).length === 0 && (
+      {!loading && (users || []).length === 0 && (
         <div className="text-center py-8 text-gray-500">
           Tidak ada user yang ditemukan.
         </div>

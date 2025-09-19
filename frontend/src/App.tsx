@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './hooks/useAuth';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
@@ -12,7 +13,6 @@ import Main from './pages/Main';
 import LevelSelection from './pages/LevelSelection';
 import Game from './pages/Game';
 import GamePlay from './pages/GamePlay';
-import QuestionManager from './pages/QuestionManager';
 import Admin from './pages/Admin';
 import AdminSetup from './pages/AdminSetup';
 import Test from './pages/Test';
@@ -115,20 +115,13 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/question-manager"
-            element={
-              <ProtectedRoute>
-                <QuestionManager />
-              </ProtectedRoute>
-            }
-          />
+
           <Route
             path="/admin"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <Admin />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
 

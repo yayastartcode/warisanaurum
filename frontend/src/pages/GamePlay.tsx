@@ -403,7 +403,7 @@ const GamePlay: React.FC = () => {
           <div className="bg-white bg-opacity-95 rounded-xl shadow-lg p-6 mb-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <div className="text-4xl mr-4">{selectedCharacter.image}</div>
+                <div className="text-4xl mr-4"><img src={selectedCharacter.image} alt={selectedCharacter.name} className="w-16 h-16 object-contain" /></div>
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">{selectedCharacter.name}</h2>
                   <p className="text-gray-600">{selectedCharacter.description}</p>
