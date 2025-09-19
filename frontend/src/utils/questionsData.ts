@@ -1379,7 +1379,7 @@ export const questionsData: Question[] = [
       }
     },
  
-    // Semar Level 2 - Essay Questions
+    // Semar Level 3 - Multiple Choice
     {
       id: 304,
     conversation: [
@@ -1396,7 +1396,7 @@ export const questionsData: Question[] = [
     ],
     correctAnswer: 0,
     explanation: 'Jawaban yang benar menggunakan bahasa Jawa krama yang tepat untuk situasi formal.',
-    character: 'semar',
+    character: 'Semar',
     level: 3,
     translation: {
       conversation: [
@@ -1430,7 +1430,7 @@ export const questionsData: Question[] = [
     ],
     correctAnswer: 1,
     explanation: 'Jawaban yang benar menggunakan bahasa Jawa ngoko yang sesuai untuk percakapan dengan Bagong.',
-    character: 'semar',
+    character: 'Semar',
     level: 3,
     translation: {
       conversation: [
@@ -1464,7 +1464,7 @@ export const questionsData: Question[] = [
     ],
     correctAnswer: 2,
     explanation: 'Jawaban yang benar menggunakan bahasa Jawa ngoko yang natural untuk percakapan sehari-hari.',
-    character: 'semar',
+    character: 'Semar',
     level: 3,
     translation: {
       conversation: [
@@ -1497,8 +1497,8 @@ export const questionsData: Question[] = [
      ],
      correctAnswer: 2,
      explanation: 'Jawaban yang benar menggunakan bahasa Jawa ngoko yang sesuai dengan karakter Semar saat berbicara dengan Pandhawa.',
-     character: 'semar',
-     level: 4,
+     character: 'Semar',
+    level: 4,
      translation: {
        conversation: [
          'Semar merasa bersalah karena menuntun Pandhawa lewat jalur hutan angker.'
@@ -1526,8 +1526,8 @@ export const questionsData: Question[] = [
      ],
      correctAnswer: 1,
      explanation: 'Jawaban yang benar menunjukkan nasihat Semar yang bijaksana menggunakan bahasa ngoko yang tepat.',
-     character: 'semar',
-     level: 4,
+     character: 'Semar',
+      level: 4,
      translation: {
        conversation: [
          'Semar memberi nasihat saat Pandhawa akan menghadapi Buta Cakil.'
@@ -1555,8 +1555,8 @@ export const questionsData: Question[] = [
      ],
      correctAnswer: 0,
      explanation: 'Jawaban yang benar menunjukkan Semar memberikan peringatan penting dengan bahasa ngoko yang sesuai.',
-     character: 'semar',
-     level: 4,
+     character: 'Semar',
+      level: 4,
      translation: {
        conversation: [
          'Semar mengajak Pandhawa berdiskusi sebelum masuk gua Kalimasada.'
