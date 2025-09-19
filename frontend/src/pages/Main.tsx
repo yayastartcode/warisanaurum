@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Play } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import progressService from '../services/progressService';
+import { getCharacterObjectId } from '../utils/characterMapping';
 
 interface Character {
   id: number;
@@ -79,13 +81,29 @@ const Main: React.FC = () => {
     }, 3000);
   };
 
-  const startGame = () => {
+  const startGame = async () => {
     if (selectedCharacter) {
-      console.log('Starting game with character:', selectedCharacter);
-      // Simpan karakter yang dipilih ke localStorage atau state management
-      localStorage.setItem('selectedCharacter', JSON.stringify(selectedCharacter));
-      console.log('Character saved to localStorage:', JSON.stringify(selectedCharacter));
-      navigate('/level-selection');
+      try {
+        console.log('Starting game with character:', selectedCharacter);
+        
+        // Panggil API selectCharacter untuk membuat UserProgress dan character progress
+        console.log('Calling selectCharacter API...');
+        const characterObjectId = getCharacterObjectId(selectedCharacter.id);
+        console.log('Using ObjectId:', characterObjectId);
+        await progressService.selectCharacter(characterObjectId);
+        console.log('Character selected successfully via API');
+        
+        // Simpan karakter yang dipilih ke localStorage
+        localStorage.setItem('selectedCharacter', JSON.stringify(selectedCharacter));
+        console.log('Character saved to localStorage:', JSON.stringify(selectedCharacter));
+        
+        navigate('/level-selection');
+      } catch (error) {
+        console.error('Error selecting character:', error);
+        // Tetap lanjut ke level selection meskipun API gagal
+        localStorage.setItem('selectedCharacter', JSON.stringify(selectedCharacter));
+        navigate('/level-selection');
+      }
     }
   };
 

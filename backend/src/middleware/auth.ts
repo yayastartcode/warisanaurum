@@ -116,23 +116,57 @@ export const validateRefreshToken = (refreshToken: string): JWTPayload | null =>
 
 // Check if user owns resource
 export const checkOwnership = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const userId = req.params['userId'] || req.body.userId;
-  
-  if (!req.user) {
-    return res.status(401).json({
+  try {
+    const { userId } = req.params;
+    const currentUserId = req.user?._id?.toString();
+
+    if (!currentUserId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Tidak terautentikasi'
+      });
+    }
+
+    if (currentUserId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Tidak memiliki akses ke resource ini'
+      });
+    }
+
+    next();
+  } catch (error) {
+    res.status(500).json({
       success: false,
-      message: 'Autentikasi diperlukan'
+      message: 'Terjadi kesalahan server'
     });
   }
+};
 
-  if ((req.user as any)._id.toString() !== userId) {
-    return res.status(403).json({
+// Admin verification middleware
+export const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Tidak terautentikasi'
+      });
+    }
+
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Akses ditolak. Hanya admin yang dapat mengakses resource ini'
+      });
+    }
+
+    next();
+  } catch (error) {
+    res.status(500).json({
       success: false,
-      message: 'Akses ditolak: Anda hanya dapat mengakses sumber daya Anda sendiri'
+      message: 'Terjadi kesalahan server'
     });
   }
-
-  next();
 };
 
 // Rate limiting for auth endpoints

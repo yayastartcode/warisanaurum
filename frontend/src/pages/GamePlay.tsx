@@ -4,6 +4,7 @@ import { Clock, Star, ArrowLeft, CheckCircle, XCircle, Crown } from 'lucide-reac
 import GameComplete from '../components/GameComplete';
 import { getQuestionsByCharacterAndLevel } from '../utils/questionsData';
 import progressService from '../services/progressService';
+import { getCharacterObjectId } from '../utils/characterMapping';
 
 interface Question {
   id: number;
@@ -231,9 +232,10 @@ const GamePlay: React.FC = () => {
       if (selectedCharacter) {
         const isCompleted = correctAnswersCount >= Math.ceil(questions.length * 0.7); // 70% correct to complete
         const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+        const characterObjectId = getCharacterObjectId(selectedCharacter.id);
         
         await progressService.updateLevelProgress({
-          characterId: selectedCharacter.id.toString(),
+          characterId: characterObjectId,
           level: currentLevel,
           score: score,
           completed: isCompleted,

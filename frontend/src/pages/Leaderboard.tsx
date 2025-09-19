@@ -1,26 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Trophy, Medal, Award, Crown, Clock, Star } from 'lucide-react';
+import { ArrowLeft, Trophy, Medal, Award, Crown, Star } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-
-interface GameResult {
-  characterId: string;
-  score: number;
-  timeElapsed: number;
-  livesRemaining: number;
-  totalQuestions: number;
-  correctAnswers: number;
-  completedAt: string;
-}
+import progressService from '../services/progressService';
 
 interface LeaderboardEntry {
   rank: number;
   username: string;
-  score: number;
-  character: string;
-  timeElapsed: number;
-  accuracy: number;
-  completedAt: string;
+  totalScore: number;
+  totalGamesCompleted: number;
+  profilePicture?: string;
 }
 
 const Leaderboard: React.FC = () => {
@@ -32,36 +21,21 @@ const Leaderboard: React.FC = () => {
     loadLeaderboardData();
   }, []);
 
-  const loadLeaderboardData = () => {
+  const loadLeaderboardData = async () => {
     try {
-      const gameResults = JSON.parse(localStorage.getItem('gameResults') || '[]') as GameResult[];
+      setIsLoading(true);
+      console.log('Loading leaderboard data...');
+      const leaderboardEntries = await progressService.getLeaderboard(10);
+      console.log('Leaderboard entries received:', leaderboardEntries);
       
-      // Convert game results to leaderboard entries
-      const entries: LeaderboardEntry[] = gameResults.map((result, index) => {
-        const characterNames: { [key: string]: string } = {
-          '1': 'Semar',
-          '2': 'Gareng', 
-          '3': 'Petruk',
-          '4': 'Bagong'
-        };
-        
-        return {
-          rank: 0, // Will be set after sorting
-          username: user?.username || `Player${index + 1}`,
-          score: result.score,
-          character: characterNames[result.characterId] || 'Unknown',
-          timeElapsed: result.timeElapsed,
-          accuracy: Math.round((result.correctAnswers / result.totalQuestions) * 100),
-          completedAt: result.completedAt
-        };
-      });
+      // Add rank to each entry
+       const rankedEntries = leaderboardEntries.map((entry, index) => ({
+         ...entry,
+         rank: index + 1
+       }));
       
-      // Sort by score (highest first) and assign ranks
-      const sortedEntries = entries
-        .sort((a, b) => b.score - a.score)
-        .map((entry, index) => ({ ...entry, rank: index + 1 }));
-      
-      setLeaderboardData(sortedEntries);
+      console.log('Ranked entries:', rankedEntries);
+      setLeaderboardData(rankedEntries);
     } catch (error) {
       console.error('Error loading leaderboard data:', error);
       setLeaderboardData([]);
@@ -70,11 +44,7 @@ const Leaderboard: React.FC = () => {
     }
   };
 
-  const formatTime = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
+
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -136,7 +106,7 @@ const Leaderboard: React.FC = () => {
             Pemain Terbaik WARISAN
           </h2>
           <p className="text-lg text-gray-600">
-            Lihat siapa yang paling menguasai budaya Jawa!
+            Lihat siapa yang paling menguasai Bahasa Jawa!
           </p>
         </div>
 
@@ -148,7 +118,7 @@ const Leaderboard: React.FC = () => {
                 Peringkat Anda
               </h3>
               <p className="text-blue-700">
-                {user?.username || 'Pengguna'} - Belum ada permainan
+                {user?.username || 'Pengguna'} 
               </p>
             </div>
             <div className="text-right">
@@ -186,19 +156,14 @@ const Leaderboard: React.FC = () => {
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="flex items-center gap-1">
                         <Star className="h-4 w-4" />
-                        {player.character}
+                        {player.totalGamesCompleted} permainan selesai
                       </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {formatTime(player.timeElapsed)}
-                      </span>
-                      <span>{player.accuracy}% akurasi</span>
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-gray-900">
-                    {player.score.toLocaleString()}
+                    {player.totalScore.toLocaleString()}
                   </div>
                   <div className="text-sm text-gray-600">poin</div>
                 </div>
@@ -218,7 +183,7 @@ const Leaderboard: React.FC = () => {
               Skor Tertinggi
             </h3>
             <p className="text-2xl font-bold text-yellow-600">
-              {leaderboardData[0]?.score.toLocaleString()}
+              {leaderboardData[0]?.totalScore.toLocaleString()}
             </p>
           </div>
 
@@ -243,7 +208,7 @@ const Leaderboard: React.FC = () => {
             </h3>
             <p className="text-2xl font-bold text-green-600">
               {Math.round(
-                leaderboardData.reduce((sum, player) => sum + player.score, 0) /
+                leaderboardData.reduce((sum, player) => sum + player.totalScore, 0) /
                 leaderboardData.length
               ).toLocaleString()}
             </p>

@@ -313,7 +313,7 @@ export const questionsData: Question[] = [
     correctAnswer: 0,
     correctAnswerText: 'merantau pulang',
     explanation: 'Peribahasa "kebo menyang mulih kandane" berarti "orang yang lama merantau pulang ke rumahnya lagi".',
-    hint: 'Perhatikan peribahasa "kebo menyang mulih kandane" yang disebutkan dalam percakapan. Kebo (kerbau) yang pergi jauh akan kembali ke kandangnya, ini menggambarkan seseorang yang pergi jauh dari rumah.',
+    hint: 'Sami kados lare ingkang saweg ngekost',
     character: 'Gareng',
     level: 2,
     translation: {
@@ -724,7 +724,7 @@ export const questionsData: Question[] = [
     correctAnswer: 0,
     correctAnswerText: "Tugas",
     explanation: "Kata 'ayahan' dalam bahasa Jawa berarti 'tugas' atau 'pekerjaan yang diberikan'. Dalam konteks ini, Petruk menjelaskan bahwa yang dia lakukan adalah tugas resmi, bukan kegiatan main-main seperti rebutan gathot di kantin.",
-    hint: "Perhatikan konteks Petruk yang menjelaskan bahwa ini adalah pekerjaan resmi, bukan kegiatan main-main. Kata 'ayahan' merujuk pada pekerjaan atau kewajiban yang diberikan kepada seseorang.",
+    hint: 'Limrahipun guru badhe nyukani dhateng murid',
     character: "Petruk",
     level: 2,
     translation: {
@@ -1137,7 +1137,7 @@ export const questionsData: Question[] = [
     explanation: "'Tepung' tegese tepangan utawa berkenalan. Ing konteks iki, Bagong ngandharake yen dheweke durung tepangan karo kanca-kancane, dadi nggawe dheweke gugup.",
     character: "Bagong",
     level: 2,
-    hint: "Bagong merasa gugup seperti 'es campur' karena belum melakukan sesuatu dengan teman-temannya. Kata 'tepung' berhubungan dengan aktivitas sosial untuk saling mengenal.",
+    hint: "Aksara utaminipun saking aksara \"K\"",
     translation: {
        conversation: [
          "(Bel pulang Petruk menunggu Bagong di depan kelas Bagong)",
@@ -1274,111 +1274,9 @@ export const questionsData: Question[] = [
   },
 
     // Bagong Level 4 - Multiple Choice Questions
-    {
-      id: 404,
-      conversation: [
-        'Bagong: "Aku wis ndeteksi lan nyingkirake 4 jebakan sadurunge kowe mlaku."',
-        'Semar: "Lho Gong, kowe kok iso ngerteni jebakan-jebakan kuwi?"',
-        'Bagong: "_____________"',
-        'Semar: "Wah, apik tenan Gong! kowe wis dadi ahli jebakan saiki."'
-      ],
-      questionLine: 'Bagong: "_____________"',
-      options: [
-        'Aku wis ndeteksi lan nyingkirake 4 jebakan sadurunge kowe mlaku.',
-        'Wis tak tata lan tak delok maneh jebakané, ben ora nyilakani kowe kabeh.',
-        'Aku wis nandhani posisi jebakan ing peta, ben gampang diwaspadai.',
-        'Alas sisih wetan wis tak resiki, jebakan cilik-cilik tak copoti.'
-      ],
-      correctAnswer: 1,
-      explanation: 'Jawaban yang benar menunjukkan Bagong menjelaskan cara dia menata dan memeriksa jebakan agar tidak membahayakan.',
-      character: 'bagong',
-      level: 4,
-      translation: {
-        conversation: [
-          'Bagong: "Aku sudah mendeteksi dan menyingkirkan 4 jebakan sebelum kalian lewat."',
-          'Semar: "Lho Gong, kamu kok bisa mengetahui jebakan-jebakan itu?"',
-          'Bagong: "_____________"',
-          'Semar: "Wah, bagus sekali Gong! kamu sudah jadi ahli jebakan sekarang."'
-        ],
-        questionLine: 'Bagong: "_____________"',
-        options: [
-          'Aku sudah mendeteksi dan menyingkirkan 4 jebakan sebelum kalian lewat.',
-          'Sudah kutata dan kulihat lagi jebakannya, biar tidak mencelakai kalian semua.',
-          'Aku sudah menandai posisi jebakan di peta, supaya gampang dihindari.',
-          'Hutan sebelah timur sudah kubersihkan, termasuk jebakan-jebakan kecil yang tersebar.'
-        ]
-      }
-    },
-    {
-      id: 405,
-      conversation: [
-        'Semar: "Gong, kowe krasa apa-apa ora ing panggonan iki?"',
-        'Bagong: "_____________"',
-        'Semar: "Wah, pancen bener Gong! pusaka Kalimasada ndhelik ing kene."',
-        'Bagong: "Aku wis ngrasakake saka mau, pak!"'
-      ],
-      questionLine: 'Bagong: "_____________"',
-      options: [
-        'Aku krasa lemah iki gemeter, koyo ana tenaga aneh.',
-        'Panggonan iki nuwuhake rasa ora enak, hawa panas banget.',
-        'Aku nemu geter alus saka sela iku, katon pusaka ndhelik nang kene.',
-        'Angine muter-muter, kahanan kene kok ora umum.'
-      ],
-      correctAnswer: 2,
-      explanation: 'Jawaban yang benar menunjukkan kemampuan Bagong merasakan getaran halus dari pusaka yang tersembunyi.',
-      character: 'bagong',
-      level: 4,
-      translation: {
-        conversation: [
-          'Semar: "Gong, kamu merasa apa-apa tidak di tempat ini?"',
-          'Bagong: "_____________"',
-          'Semar: "Wah, memang benar Gong! pusaka Kalimasada tersembunyi di sini."',
-          'Bagong: "Aku sudah merasakannya dari tadi, pak!"'
-        ],
-        questionLine: 'Bagong: "_____________"',
-        options: [
-          'Aku merasa tanah ini bergetar, seperti ada kekuatan aneh.',
-          'Tempat ini bikin perasaan tidak enak, udaranya panas banget.',
-          'Aku merasakan getaran halus dari celah itu, dan hatiku memberi tahu ada pusaka tersimpan.',
-          'Anginnya berputar-putar, keadaan di sini memang tidak wajar.'
-        ]
-      }
-    },
-    {
-      id: 406,
-      conversation: [
-        'Semar: "Gong, kowe wis slamet saka jebakan guwa kuwi."',
-        'Bagong: "_____________"',
-        'Semar: "Iya Gong, untunge aku cepet nulungi kowe."',
-        'Bagong: "Aku ora bakal lali karo kabecikan panjenengan, pak."'
-      ],
-      questionLine: 'Bagong: "_____________"',
-      options: [
-        'Matur nuwun yo, Mar, nek ora aku wis keseret jurang.',
-        'Untunge kowe cepet nulungi aku, nek ora wis mati konyol.',
-        'Aku matur nuwun tenan, wis ditulungi saka jebakan edan kuwi.',
-        'Aku sukur banget, nek ora kowe kabeh aku wis ora ana.'
-      ],
-      correctAnswer: 0,
-      explanation: 'Jawaban yang benar menunjukkan ucapan terima kasih Bagong yang sopan dan sesuai dengan karakternya.',
-      character: 'bagong',
-      level: 4,
-      translation: {
-        conversation: [
-          'Semar: "Gong, kamu sudah selamat dari jebakan gua itu."',
-          'Bagong: "_____________"',
-          'Semar: "Iya Gong, untung aku cepat menolongmu."',
-          'Bagong: "Aku tidak akan lupa dengan kebaikan bapak."'
-        ],
-        questionLine: 'Bagong: "_____________"',
-        options: [
-          'Terima kasih ya, Mar, kalau tidak aku sudah jatuh ke jurang.',
-          'Untung kamu cepat menolongku, kalau tidak aku sudah mati konyol.',
-          'Aku benar-benar berterima kasih, sudah ditolong dari jebakan gila itu.',
-          'Aku sangat bersyukur, kalau bukan kalian aku sudah tidak ada.'
-        ]
-      }
-    },
+   
+  
+   
 
     // Bagong Level 4 - Multiple Choice Questions
     {
@@ -1483,7 +1381,7 @@ export const questionsData: Question[] = [
  
     // Semar Level 2 - Essay Questions
     {
-      id: 301,
+      id: 304,
     conversation: [
       'Pandu Dewanata: "Ki Lurah Semar, kula kadosipun mireng suwanten rame saking wingking dalemipun panjenengan"',
       'Semar: "_____________"',
@@ -1516,7 +1414,7 @@ export const questionsData: Question[] = [
     }
   },
   {
-    id: 302,
+    id: 305,
     conversation: [
       'Bagong: "Pak, kula diakon ibu-ibu mrene tekna ngawaake gedhang goreng kangge bapak-bapak"',
       'Semar: "_____________"',
@@ -1551,7 +1449,7 @@ export const questionsData: Question[] = [
     }
   },
   {
-    id: 303,
+    id: 306,
     conversation: [
       'Semar: "Ealah Reng jane wong saiki gur ronda dinggo formalitas!"',
       'Gareng: "Inggih pak, sendal kula, kula tilar ing jawi dados ganti ukuran L.Nanging samparan kula M"',
@@ -1673,106 +1571,6 @@ export const questionsData: Question[] = [
      }
    },
 
-   // Bagong Level 4 - Multiple Choice Questions
-   {
-     id: 404,
-     conversation: [
-       'Bagong: "Aku wis ndeteksi lan nyingkirake 4 jebakan sadurunge kowe mlaku."',
-       'Semar: "Lho Gong, kowe kok iso ngerti jebakan?"',
-       'Bagong: "Wis tak tata lan tak delok maneh jebakané, ben ora nyilakani kowe kabeh."'
-     ],
-     questionLine: 'Ukara ingkang trep:',
-     options: [
-       'Aku wis ndeteksi lan nysingkirake 4 jebakan sadurunge kowe mlaku.',
-       'Wis tak tata lan tak delok maneh jebakané, ben ora nyilakani kowe kabeh.',
-       'Aku wis nandhani posisi jebakan ing peta, ben gampang diwaspadai.',
-       'Alas sisih wetan wis tak resiki, jebakan cilik-cilik tak copoti.'
-     ],
-     correctAnswer: 1,
-     explanation: 'Jawaban yang benar menunjukkan Bagong menjelaskan cara dia menata dan memeriksa jebakan untuk keselamatan.',
-     character: 'Bagong',
-     level: 4,
-     translation: {
-       conversation: [
-         'Bagong: "Aku sudah mendeteksi dan menyingkirkan 4 jebakan sebelum kalian lewat."',
-         'Semar: "Lho Gong, kamu kok bisa tahu jebakan?"',
-         'Bagong: "Sudah kutata dan kulihat lagi jebakannya, biar tidak mencelakai kalian semua."'
-       ],
-       questionLine: 'Kalimat yang tepat:',
-       options: [
-         'Aku sudah mendeteksi dan menyingkirkan 4 jebakan sebelum kalian lewat.',
-         'Sudah kutata dan kulihat lagi jebakannya, biar tidak mencelakai kalian semua.',
-         'Aku sudah menandai posisi jebakan di peta, supaya gampang dihindari.',
-         'Hutan sebelah timur sudah kubersihkan, termasuk jebakan-jebakan kecil yang tersebar.'
-       ]
-     }
-   },
-   {
-     id: 405,
-     conversation: [
-       'Bagong: "Aku krasa lemah iki gemeter, koyo ana tenaga aneh."',
-       'Semar: "Lho Gong, kowe ngrasa apa?"',
-       'Bagong: "Aku nemu geter alus saka sela iku, katon pusaka ndhelik nang kene."'
-     ],
-     questionLine: 'Ukara ingkang trep:',
-     options: [
-       'Aku krasa lemah iki gemeter, koyo ana tenaga aneh.',
-       'Panggonan iki nuwuhake rasa ora enak, hawa panas banget.',
-       'Aku nemu geter alus saka sela iku, katon pusaka ndhelik nang kene.',
-       'Angine muter-muter, kahanan kene kok ora umum.'
-     ],
-     correctAnswer: 2,
-     explanation: 'Jawaban yang benar menunjukkan Bagong merasakan getaran halus yang menandakan adanya pusaka tersembunyi.',
-     character: 'Bagong',
-     level: 4,
-     translation: {
-       conversation: [
-         'Bagong: "Aku merasa tanah ini bergetar, seperti ada kekuatan aneh."',
-         'Semar: "Lho Gong, kamu merasakan apa?"',
-         'Bagong: "Aku merasakan getaran halus dari celah itu, dan hatiku memberi tahu ada pusaka tersimpan."'
-       ],
-       questionLine: 'Kalimat yang tepat:',
-       options: [
-         'Aku merasa tanah ini bergetar, seperti ada kekuatan aneh.',
-         'Tempat ini bikin perasaan tidak enak, udaranya panas banget.',
-         'Aku merasakan getaran halus dari celah itu, dan hatiku memberi tahu ada pusaka tersimpan.',
-         'Anginnya berputar-putar, keadaan di sini memang tidak wajar.'
-       ]
-     }
-   },
-   {
-     id: 406,
-     conversation: [
-       'Bagong: "Matur nuwun yo, Mar, nek ora aku wis keseret jurang."',
-       'Semar: "Wis Gong, sing penting kowe slamet."',
-       'Bagong: "Aku matur nuwun tenan, wis ditulungi saka jebakan edan kuwi."'
-     ],
-     questionLine: 'Ukara ingkang trep:',
-     options: [
-       'Matur nuwun yo, Mar, nek ora aku wis keseret jurang.',
-       'Untunge kowe cepet nulungi aku, nek ora wis mati konyol.',
-       'Aku matur nuwun tenan, wis ditulungi saka jebakan edan kuwi.',
-       'Aku sukur banget, nek ora kowe kabeh aku wis ora ana.'
-     ],
-     correctAnswer: 0,
-     explanation: 'Jawaban yang benar menunjukkan Bagong berterima kasih dengan sopan kepada Semar karena diselamatkan.',
-     character: 'Bagong',
-     level: 4,
-     translation: {
-       conversation: [
-         'Bagong: "Terima kasih ya, Mar, kalau tidak aku sudah jatuh ke jurang."',
-         'Semar: "Sudah Gong, yang penting kamu selamat."',
-         'Bagong: "Aku benar-benar berterima kasih, sudah ditolong dari jebakan gila itu."'
-       ],
-       questionLine: 'Kalimat yang tepat:',
-       options: [
-         'Terima kasih ya, Mar, kalau tidak aku sudah jatuh ke jurang.',
-         'Untung kamu cepat menolongku, kalau tidak aku sudah mati konyol.',
-         'Aku benar-benar berterima kasih, sudah ditolong dari jebakan gila itu.',
-         'Aku sangat bersyukur, kalau bukan kalian aku sudah tidak ada.'
-       ]
-     }
-   },
 
    // Semar Level 2 - Essay Questions
    {
@@ -1849,7 +1647,7 @@ export const questionsData: Question[] = [
     correctAnswer: 0,
     correctAnswerText: 'rendah hati',
     explanation: 'Kata "lembah manah" dalam bahasa Jawa berarti "rendah hati" dalam bahasa Indonesia.',
-    hint: 'Perhatikan konteks percakapan tentang kedewasaan dan sifat kesatria sejati. "Lembah" berarti rendah, dan "manah" berarti hati. Gabungan kedua kata ini menunjukkan sikap yang tidak sombong.',
+    hint: 'Sinonim tembung andhap asor',
     character: 'Semar',
     level: 2,
     translation: {

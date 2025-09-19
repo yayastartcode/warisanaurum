@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Play, Lock, Star, Trophy } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import progressService, { type LevelProgress } from '../services/progressService';
+import { getCharacterObjectId } from '../utils/characterMapping';
 
 interface Character {
   id: number;
@@ -58,7 +59,9 @@ const LevelSelection: React.FC = () => {
           
           // Ambil level yang tersedia untuk karakter ini
           try {
-            const availableLevels = await progressService.getAvailableLevels(character.id.toString());
+            const characterObjectId = getCharacterObjectId(character.id);
+            console.log('Using ObjectId for levels:', characterObjectId);
+            const availableLevels = await progressService.getAvailableLevels(characterObjectId);
             setLevels(availableLevels);
             console.log('Levels loaded successfully:', availableLevels);
           } catch (apiError: any) {

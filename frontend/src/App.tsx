@@ -13,6 +13,8 @@ import LevelSelection from './pages/LevelSelection';
 import Game from './pages/Game';
 import GamePlay from './pages/GamePlay';
 import QuestionManager from './pages/QuestionManager';
+import Admin from './pages/Admin';
+import AdminSetup from './pages/AdminSetup';
 import Test from './pages/Test';
 
 function App() {
@@ -40,6 +42,10 @@ function App() {
           <Route
             path="/test"
             element={<Test />}
+          />
+          <Route
+            path="/admin-setup"
+            element={<AdminSetup />}
           />
 
           {/* Protected routes (require authentication) */}
@@ -114,6 +120,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <QuestionManager />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Admin />
               </ProtectedRoute>
             }
           />

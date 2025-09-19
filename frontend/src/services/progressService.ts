@@ -79,7 +79,7 @@ class ProgressService {
   // Get available levels for character
   async getAvailableLevels(characterId: string): Promise<LevelProgress[]> {
     const response = await apiService['api'].get(`/progress/levels/${characterId}`);
-    return response.data.data;
+    return response.data.data.levels;
   }
 
   // Get leaderboard

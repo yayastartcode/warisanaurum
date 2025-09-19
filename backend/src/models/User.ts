@@ -12,6 +12,7 @@ export interface IUser extends Document {
   achievements: string[];
   level: number;
   experience: number;
+  role: 'user' | 'admin';
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -71,6 +72,11 @@ const UserSchema: Schema = new Schema({
     type: Number,
     default: 0,
     min: [0, 'Pengalaman tidak boleh negatif']
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
   }
 }, {
   timestamps: true,

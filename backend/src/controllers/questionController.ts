@@ -249,7 +249,8 @@ export const createQuestion = async (req: AuthRequest, res: Response) => {
       questionType = 'multiple_choice',
       explanation,
       difficulty,
-      category
+      category,
+      translation
     } = req.body;
 
     // Basic validation
@@ -320,6 +321,11 @@ export const createQuestion = async (req: AuthRequest, res: Response) => {
       questionData.correctAnswer = correctAnswer;
     } else if (questionType === 'essay') {
       questionData.correctAnswerText = correctAnswerText;
+    }
+
+    // Add translation if provided
+    if (translation) {
+      questionData.translation = translation;
     }
 
     const newQuestion = new Question(questionData);

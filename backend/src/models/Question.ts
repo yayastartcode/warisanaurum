@@ -12,6 +12,12 @@ export interface IQuestion extends Document {
   points: number;
   category: 'origin' | 'history' | 'culture' | 'facts' | 'general';
   isActive: boolean;
+  translation?: {
+    conversation?: string[];
+    questionLine?: string;
+    options?: string[];
+    correctAnswerText?: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -87,6 +93,28 @@ const QuestionSchema: Schema = new Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  translation: {
+    conversation: [{
+      type: String,
+      trim: true,
+      maxlength: [500, 'Setiap baris percakapan tidak boleh lebih dari 500 karakter']
+    }],
+    questionLine: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Pertanyaan terjemahan tidak boleh lebih dari 500 karakter']
+    },
+    options: [{
+      type: String,
+      trim: true,
+      maxlength: [200, 'Setiap opsi terjemahan tidak boleh lebih dari 200 karakter']
+    }],
+    correctAnswerText: {
+      type: String,
+      trim: true,
+      maxlength: [1000, 'Jawaban benar terjemahan tidak boleh lebih dari 1000 karakter']
+    }
   }
 }, {
   timestamps: true
